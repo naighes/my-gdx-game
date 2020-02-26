@@ -12,6 +12,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
     private Bucket bucket;
     private RainDrops rainDrops;
+    private Player player;
 
     @Override
     public void create() {
@@ -22,6 +23,9 @@ public class MyGdxGame extends ApplicationAdapter {
 
         rainDrops = RainDrops.New(Gdx.graphics);
         rainDrops.create(Gdx.files, Gdx.graphics);
+
+        player = Player.New(Gdx.graphics);
+        player.create(Gdx.files, Gdx.graphics);
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -37,6 +41,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
         batch.begin();
 
+        this.player.render(Gdx.input, Gdx.graphics, camera, batch);
         this.bucket.render(Gdx.input, Gdx.graphics, camera, batch);
         this.rainDrops.render(Gdx.input, Gdx.graphics, camera, batch);
 
