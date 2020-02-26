@@ -6,67 +6,43 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 
 class Player {
-    private final int width = 64;
-    private final int height = 64;
-
+    private final Rectangle rectangle;
     private final String assetPath;
-    private final Array<TextureRegion> regions;
 
-    private int x;
-    private int y;
-    private Texture texture;
-    private long lastDropTime;
-    private int animationIndex = 0;
+    private Animation animation;
 
-    private Player(String assetPath) {
+    private Player(Rectangle rectangle, String assetPath) {
+        this.rectangle = rectangle;
         this.assetPath = assetPath;
-        this.regions = new Array<>();
     }
 
     static Player New(Graphics graphics) {
+        final int width = 64;
+        final int height = 64;
         final String assetPath = "player_1.png";
-        return new Player(assetPath);
+        Rectangle r = new Rectangle(MathUtils.random(0, graphics.getWidth() - width),
+                MathUtils.random(0, graphics.getHeight() - height),
+                width,
+                height);
+        return new Player(r, assetPath);
     }
 
     public void create(Files files, Graphics graphics) {
-        this.lastDropTime = TimeUtils.nanoTime();
-        this.texture = new Texture(files.internal(this.assetPath));
-        this.regions.add(new TextureRegion(this.texture,
-                0,
-                0,
-                width,
-                height));
-        this.regions.add(new TextureRegion(this.texture,
-                64,
-                0,
-                width,
-                height));
-        this.regions.add(new TextureRegion(this.texture,
-                128,
-                0,
-                width,
-                height));
-        this.regions.add(new TextureRegion(this.texture,
-                192,
-                0,
-                width,
-                height));
+        Texture texture = new Texture(files.internal(this.assetPath));
+        this.animation = Animation.New(texture,
+                200,
+                new Rectangle(0f, 0f, 0.25f, 0.25f),
+                new Rectangle(0.25f, 0f, 0.5f, 0.25f),
+                new Rectangle(0.5f, 0f, 0.75f, 0.25f),
+                new Rectangle(0.75f, 0f, 1f, 0.25f));
     }
 
     public void render(Input input, Graphics graphics, Camera camera, Batch batch) {
-        if (TimeUtils.nanoTime() - this.lastDropTime > TimeUtils.millisToNanos(200)) {
-            this.lastDropTime = TimeUtils.nanoTime();
-            this.animationIndex = this.animationIndex + 1;
-
-            if (this.animationIndex >= this.regions.size) {
-                this.animationIndex = 0;
-            }
-        }
-        batch.draw(this.regions.get(this.animationIndex), this.x, this.y);
+        animation.render(input, graphics, camera, batch);
+        batch.draw(this.animation.getCurrentFrame(), this.rectangle.x, this.rectangle.y);
     }
 }
