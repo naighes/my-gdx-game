@@ -9,7 +9,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class MyGdxGame extends ApplicationAdapter {
     private SpriteBatch batch;
     private OrthographicCamera camera;
+
     private Player player;
+    private Background background;
 
     @Override
     public void create() {
@@ -17,6 +19,9 @@ public class MyGdxGame extends ApplicationAdapter {
 
         player = Player.New(Gdx.graphics);
         player.create(Gdx.files, Gdx.graphics);
+
+        background = Background.New(Gdx.graphics);
+        background.create(Gdx.files, Gdx.graphics);
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -32,6 +37,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
         batch.begin();
 
+        this.background.render(Gdx.input, Gdx.graphics, camera, batch);
         this.player.render(Gdx.input, Gdx.graphics, camera, batch);
 
         batch.end();
