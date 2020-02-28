@@ -15,16 +15,44 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
     public void create() {
-        batch = new SpriteBatch();
+        this.batch = new SpriteBatch();
 
-        player = Player.New(Gdx.graphics);
-        player.create(Gdx.files, Gdx.graphics);
+        this.player = Player.New(Gdx.graphics);
+        this.player.create(Gdx.files, Gdx.graphics);
 
-        background = Background.New(Gdx.graphics);
-        background.create(Gdx.files, Gdx.graphics);
+        this.background = Background.New(Gdx.graphics);
+        this.background.create(Gdx.files, Gdx.graphics);
 
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        this.camera = new OrthographicCamera();
+        this.camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        this.camera.position.x = this.player.getX();
+        this.camera.position.y = this.player.getY();
+    }
+
+    private void updateCamera() {
+        float dx = this.player.getX() - this.camera.position.x;
+        float lx = Gdx.graphics.getWidth() / 5f;
+
+        if (dx > lx) {
+            this.camera.position.x = this.player.getX() - lx;
+        }
+
+        if (dx < -1f * lx) {
+            this.camera.position.x = this.player.getX() + lx;
+        }
+
+        float dy = this.player.getY() - this.camera.position.y;
+        float ly = Gdx.graphics.getHeight() / 5f;
+
+        if (dy > ly) {
+            this.camera.position.y = this.player.getY() - ly;
+        }
+
+        if (dy < -1f * ly) {
+            this.camera.position.y = this.player.getY() + ly;
+        }
+
+        this.camera.update();
     }
 
     @Override
@@ -32,15 +60,15 @@ public class MyGdxGame extends ApplicationAdapter {
         Gdx.gl.glClearColor(0x64 / 255f, 0x95 / 255f, 0xed / 255f, 0xff / 255f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        camera.update();
-        batch.setProjectionMatrix(camera.combined);
+        this.updateCamera();
+        this.batch.setProjectionMatrix(this.camera.combined);
 
-        batch.begin();
+        this.batch.begin();
 
-        this.background.render(Gdx.input, Gdx.graphics, camera, batch);
-        this.player.render(Gdx.input, Gdx.graphics, camera, batch);
+        this.background.render(Gdx.input, Gdx.graphics, this.camera, this.batch);
+        this.player.render(Gdx.input, Gdx.graphics, this.camera, this.batch);
 
-        batch.end();
+        this.batch.end();
     }
 
     @Override

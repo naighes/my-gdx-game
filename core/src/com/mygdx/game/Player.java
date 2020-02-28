@@ -6,7 +6,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
@@ -33,13 +32,21 @@ class Player {
     static Player New(Graphics graphics) {
         final int width = 64;
         final int height = 64;
-        final float speed = 120;
+        final float speed = 240;
         final String assetPath = "player_1.png";
-        Rectangle r = new Rectangle(MathUtils.random(0, graphics.getWidth() - width),
-                MathUtils.random(0, graphics.getHeight() - height),
+        Rectangle r = new Rectangle(graphics.getWidth() / 2 + width / 2,
+                graphics.getHeight() / 2 + height / 2,
                 width,
                 height);
         return new Player(r, assetPath, speed);
+    }
+
+    public float getX() {
+        return this.rectangle.x;
+    }
+
+    public float getY() {
+        return this.rectangle.y;
     }
 
     public void create(Files files, Graphics graphics) {
@@ -73,6 +80,8 @@ class Player {
 
     public void render(Input input, Graphics graphics, Camera camera, Batch batch) {
         if (input.isTouched()) {
+            float dt = graphics.getDeltaTime();
+
             Vector3 touchPos = new Vector3();
             touchPos.set(input.getX(), input.getY(), 0);
             camera.unproject(touchPos);
@@ -87,18 +96,18 @@ class Player {
 
             if (Math.abs(deltaX) > Math.abs(deltaY)) {
                 if (deltaX > 0) {
-                    this.rectangle.x = this.rectangle.x + this.speed * graphics.getDeltaTime();
+                    this.rectangle.x = this.rectangle.x + this.speed * dt;
                     this.currentAnimation = this.rightAnimation;
                 } else {
-                    this.rectangle.x = this.rectangle.x - this.speed * graphics.getDeltaTime();
+                    this.rectangle.x = this.rectangle.x - this.speed * dt;
                     this.currentAnimation = this.leftAnimation;
                 }
             } else {
                 if (deltaY > 0) {
-                    this.rectangle.y = this.rectangle.y + this.speed * graphics.getDeltaTime();
+                    this.rectangle.y = this.rectangle.y + this.speed * dt;
                     this.currentAnimation = this.upAnimation;
                 } else {
-                    this.rectangle.y = this.rectangle.y - this.speed * graphics.getDeltaTime();
+                    this.rectangle.y = this.rectangle.y - this.speed * dt;
                     this.currentAnimation = this.downAnimation;
                 }
             }
