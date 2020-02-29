@@ -41,6 +41,18 @@ public class MyGdxGame extends ApplicationAdapter {
             this.camera.position.x = this.player.getX() + lx;
         }
 
+        float bx1 = this.background.getWidth() - Gdx.graphics.getWidth() / 2f;
+
+        if (this.camera.position.x >= bx1) {
+            this.camera.position.x = bx1;
+        }
+
+        float bx2 = Gdx.graphics.getWidth() / 2f;
+
+        if (this.camera.position.x <= bx2) {
+            this.camera.position.x = bx2;
+        }
+
         float dy = this.player.getY() - this.camera.position.y;
         float ly = Gdx.graphics.getHeight() / 5f;
 
@@ -50,6 +62,18 @@ public class MyGdxGame extends ApplicationAdapter {
 
         if (dy < -1f * ly) {
             this.camera.position.y = this.player.getY() + ly;
+        }
+
+        float by1 = this.background.getHeight() - Gdx.graphics.getHeight() / 2f;
+
+        if (this.camera.position.y >= by1) {
+            this.camera.position.y = by1;
+        }
+
+        float by2 = Gdx.graphics.getHeight() / 2f;
+
+        if (this.camera.position.y <= by2) {
+            this.camera.position.y = by2;
         }
 
         this.camera.update();

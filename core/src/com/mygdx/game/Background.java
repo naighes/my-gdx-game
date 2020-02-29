@@ -30,6 +30,14 @@ class Background implements Disposable {
         this.assetPath = assetPath;
     }
 
+    public int getWidth() {
+        return this.texture.getWidth();
+    }
+
+    public int getHeight() {
+        return this.texture.getHeight();
+    }
+
     public void create(Files files, Graphics graphics) {
         this.texture = new Texture(files.internal(this.assetPath));
     }
