@@ -6,13 +6,17 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
-class Player {
+class Player extends Sprite {
     private final Rectangle rectangle;
     private final String assetPath;
     private final float speed;
+    private final Background background;
+    private final float offsetX;
+    private final float offsetY;
 
     private Animation downAnimation;
     private Animation upAnimation;
@@ -23,22 +27,36 @@ class Player {
 
     private Player(Rectangle rectangle,
                    String assetPath,
-                   float speed) {
+                   float speed,
+                   Background background,
+                   float offsetX,
+                   float offsetY) {
         this.rectangle = rectangle;
         this.assetPath = assetPath;
         this.speed = speed;
+        this.background = background;
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
     }
 
-    static Player New(Graphics graphics) {
+    static Player New(Graphics graphics, Background background) {
         final int width = 64;
         final int height = 64;
         final float speed = 240;
+        final float offsetX = 14f;
+        final float offsetY = 5f;
         final String assetPath = "player_1.png";
-        Rectangle r = new Rectangle(graphics.getWidth() / 2 + width / 2,
-                graphics.getHeight() / 2 + height / 2,
+        // TODO: initial position needs to be configurable
+        Rectangle r = new Rectangle(graphics.getWidth() / 2 + width / 2 - 20,
+                graphics.getHeight() / 2 + height / 2 - 40,
                 width,
                 height);
-        return new Player(r, assetPath, speed);
+        return new Player(r,
+                assetPath,
+                speed,
+                background,
+                offsetX,
+                offsetY);
     }
 
     public float getX() {
@@ -51,6 +69,7 @@ class Player {
 
     public void create(Files files, Graphics graphics) {
         Texture texture = new Texture(files.internal(this.assetPath));
+
         this.downAnimation = Animation.New(texture,
                 200,
                 new Rectangle(0f, 0f, 0.25f, 0.25f),
@@ -79,7 +98,10 @@ class Player {
     }
 
     public void render(Input input, Graphics graphics, Camera camera, Batch batch) {
+
         if (input.isTouched()) {
+            float prevX = this.rectangle.x;
+            float prevY = this.rectangle.y;
             float dt = graphics.getDeltaTime();
 
             Vector3 touchPos = new Vector3();
@@ -110,6 +132,15 @@ class Player {
                     this.rectangle.y = this.rectangle.y - this.speed * dt;
                     this.currentAnimation = this.downAnimation;
                 }
+            }
+
+            Tile tile = this.background.collidesWith(this.rectangle,
+                    this.offsetX,
+                    this.offsetY);
+
+            if (tile != null) {
+                this.rectangle.x = prevX;
+                this.rectangle.y = prevY;
             }
 
             this.currentAnimation.render(input, graphics, camera, batch);

@@ -1,27 +1,28 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-public class MyGdxGame extends ApplicationAdapter {
+public class MyGdxGame extends Game {
     private SpriteBatch batch;
     private OrthographicCamera camera;
 
-    private Player player;
     private Background background;
+    private Player player;
 
     @Override
     public void create() {
-        this.batch = new SpriteBatch();
 
-        this.player = Player.New(Gdx.graphics);
-        this.player.create(Gdx.files, Gdx.graphics);
+        this.batch = new SpriteBatch();
 
         this.background = Background.New(Gdx.graphics);
         this.background.create(Gdx.files, Gdx.graphics);
+
+        this.player = Player.New(Gdx.graphics, this.background);
+        this.player.create(Gdx.files, Gdx.graphics);
 
         this.camera = new OrthographicCamera();
         this.camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -81,6 +82,8 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
     public void render() {
+        super.render();
+
         Gdx.gl.glClearColor(0x64 / 255f, 0x95 / 255f, 0xed / 255f, 0xff / 255f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -97,6 +100,8 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
     public void dispose() {
+        super.dispose();
+
         this.batch.dispose();
     }
 }
