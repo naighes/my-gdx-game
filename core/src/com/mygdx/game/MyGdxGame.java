@@ -12,10 +12,10 @@ public class MyGdxGame extends Game {
 
     private Background background;
     private Player player;
+    private Overlay overlay;
 
     @Override
     public void create() {
-
         this.batch = new SpriteBatch();
 
         this.background = Background.New(Gdx.graphics);
@@ -23,6 +23,9 @@ public class MyGdxGame extends Game {
 
         this.player = Player.New(Gdx.graphics, this.background);
         this.player.create(Gdx.files, Gdx.graphics);
+
+        this.overlay = Overlay.New(Gdx.graphics);
+        this.overlay.create(Gdx.files, Gdx.graphics);
 
         this.camera = new OrthographicCamera();
         this.camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -94,6 +97,7 @@ public class MyGdxGame extends Game {
 
         this.background.render(Gdx.input, Gdx.graphics, this.camera, this.batch);
         this.player.render(Gdx.input, Gdx.graphics, this.camera, this.batch);
+        this.overlay.render(Gdx.input, Gdx.graphics, this.camera, this.batch);
 
         this.batch.end();
     }

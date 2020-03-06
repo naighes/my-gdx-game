@@ -45,6 +45,45 @@ class Tile {
     }
 }
 
+class Overlay implements Disposable {
+    private final Rectangle rectangle;
+    private final String assetPath;
+
+    private Texture texture;
+
+    static Overlay New(Graphics graphics) {
+        final String assetPath = "background_1_overlay.png";
+        Rectangle r = new Rectangle(0f,
+                0f,
+                graphics.getWidth(),
+                graphics.getHeight());
+        return new Overlay(r, assetPath);
+    }
+
+    private Overlay(Rectangle rectangle,
+                    String assetPath) {
+        this.rectangle = rectangle;
+        this.assetPath = assetPath;
+    }
+
+    public void create(Files files, Graphics graphics) {
+        this.texture = new Texture(files.internal(this.assetPath));
+    }
+
+    public void render(Input input, Graphics graphics, Camera camera, Batch batch) {
+        batch.draw(this.texture,
+                this.rectangle.x,
+                this.rectangle.y,
+                this.texture.getWidth(),
+                this.texture.getHeight());
+    }
+
+    @Override
+    public void dispose() {
+        this.texture.dispose();
+    }
+}
+
 class Background implements Disposable {
     private final int TILE_SIZE = 32;
     private final Rectangle rectangle;
@@ -99,10 +138,10 @@ class Background implements Disposable {
 
             if (tile.isSolid()) {
                 // per pixel collision.
-                int leftX = (int)(r.x + offsetX);
-                int rightX = (int)(r.x + r.width - offsetX);
-                int leftY = (int)(this.collisionTexture.getHeight() - r.y - r.height + offsetY);
-                int rightY = (int)(this.collisionTexture.getHeight() - r.y - offsetY);
+                int leftX = (int) (r.x + offsetX);
+                int rightX = (int) (r.x + r.width - offsetX);
+                int leftY = (int) (this.collisionTexture.getHeight() - r.y - r.height + offsetY);
+                int rightY = (int) (this.collisionTexture.getHeight() - r.y - offsetY);
 
                 for (int y = leftY; y < rightY; y++) {
                     for (int x = leftX; x < rightX; x++) {
