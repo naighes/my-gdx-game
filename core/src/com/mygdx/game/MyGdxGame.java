@@ -5,27 +5,104 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 
 public class MyGdxGame extends Game {
     private SpriteBatch batch;
     private OrthographicCamera camera;
-
-    private Background background;
     private Player player;
-    private Overlay overlay;
+    private ObjectMap<String, Scenario> scenarios;
+    private Scenario currentScenario;
+    private Connections connections;
+
+    public MyGdxGame() {
+        super();
+        this.connections = new Connections();
+
+        this.connections = new Connections();
+        this.connections.add(
+                new Connection(
+                        new Endpoint(
+                                "forest_1",
+                                new Rectangle(877f, 910f, 76f, 64f),
+                                new Vector2(880f, 50f)
+                        ),
+                        new Endpoint(
+                                "inner_castle_1",
+                                new Rectangle(1262, 378f, 142f, 64f),
+                                new Vector2(1310f, 200f)
+                        )
+                )
+        );
+        this.scenarios = new ObjectMap<>();
+    }
+
+    Scenario getCurrentScenario() {
+        return this.currentScenario;
+    }
+
+    Array<Junction> getConnections(String scenarioName) {
+        return this.connections.get(scenarioName);
+    }
+
+    void setCurrentScenario(Scenario currentScenario) {
+        this.currentScenario = currentScenario;
+        this.setScreen(this.currentScenario);
+    }
+
+    Player getPlayer() {
+        return this.player;
+    }
+
+    SpriteBatch getBatch() {
+        return this.batch;
+    }
+
+    OrthographicCamera getCamera() {
+        return this.camera;
+    }
+
+    Scenario getScenario(String name) {
+        return this.scenarios.get(name);
+    }
 
     @Override
     public void create() {
         this.batch = new SpriteBatch();
 
-        this.background = Background.New(Gdx.graphics);
-        this.background.create(Gdx.files, Gdx.graphics);
+        this.scenarios.put("forest_1",
+                new Scenario(
+                        this,
+                        "forest_1",
+                        0f,
+                        0f,
+                        new Vector2(880f, 50f),
+                        "background_1.jpg",
+                        "background_1_collision.gif",
+                        "background_1_overlay.png"
+                ));
 
-        this.player = Player.New(Gdx.graphics, this.background);
-        this.player.create(Gdx.files, Gdx.graphics);
+        this.scenarios.put("inner_castle_1",
+                new Scenario(
+                        this,
+                        "inner_castle_1",
+                        0f,
+                        0f,
+                        new Vector2(1310f, 410f),
+                        "inner_castle_1.png",
+                        "inner_castle_1_collision.gif",
+                        null
+                ));
 
-        this.overlay = Overlay.New(Gdx.graphics);
-        this.overlay.create(Gdx.files, Gdx.graphics);
+        this.player = Player.New(this);
+        this.setCurrentScenario(this.scenarios.get("forest_1"));
+        player.setX(this.currentScenario.getPlayerInitialPosition().x);
+        player.setY(this.currentScenario.getPlayerInitialPosition().y);
+
+        this.player.create(Gdx.files);
 
         this.camera = new OrthographicCamera();
         this.camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -45,7 +122,7 @@ public class MyGdxGame extends Game {
             this.camera.position.x = this.player.getX() + lx;
         }
 
-        float bx1 = this.background.getWidth() - Gdx.graphics.getWidth() / 2f;
+        float bx1 = this.getCurrentScenario().getArea().getWidth() - Gdx.graphics.getWidth() / 2f;
 
         if (this.camera.position.x >= bx1) {
             this.camera.position.x = bx1;
@@ -68,7 +145,7 @@ public class MyGdxGame extends Game {
             this.camera.position.y = this.player.getY() + ly;
         }
 
-        float by1 = this.background.getHeight() - Gdx.graphics.getHeight() / 2f;
+        float by1 = this.getCurrentScenario().getArea().getHeight() - Gdx.graphics.getHeight() / 2f;
 
         if (this.camera.position.y >= by1) {
             this.camera.position.y = by1;
@@ -83,23 +160,21 @@ public class MyGdxGame extends Game {
         this.camera.update();
     }
 
+    private void update() {
+        this.player.update(Gdx.input, Gdx.graphics, this.camera);
+    }
+
     @Override
     public void render() {
-        super.render();
+        update();
 
-        Gdx.gl.glClearColor(0x64 / 255f, 0x95 / 255f, 0xed / 255f, 0xff / 255f);
+        Gdx.gl.glClearColor(0f, 0f, 0f, 0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         this.updateCamera();
         this.batch.setProjectionMatrix(this.camera.combined);
 
-        this.batch.begin();
-
-        this.background.render(Gdx.input, Gdx.graphics, this.camera, this.batch);
-        this.player.render(Gdx.input, Gdx.graphics, this.camera, this.batch);
-        this.overlay.render(Gdx.input, Gdx.graphics, this.camera, this.batch);
-
-        this.batch.end();
+        super.render();
     }
 
     @Override

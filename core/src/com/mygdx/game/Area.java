@@ -1,9 +1,6 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Files;
-import com.badlogic.gdx.Graphics;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.TextureData;
@@ -45,48 +42,10 @@ class Tile {
     }
 }
 
-class Overlay implements Disposable {
-    private final Rectangle rectangle;
-    private final String assetPath;
-
-    private Texture texture;
-
-    static Overlay New(Graphics graphics) {
-        final String assetPath = "background_1_overlay.png";
-        Rectangle r = new Rectangle(0f,
-                0f,
-                graphics.getWidth(),
-                graphics.getHeight());
-        return new Overlay(r, assetPath);
-    }
-
-    private Overlay(Rectangle rectangle,
-                    String assetPath) {
-        this.rectangle = rectangle;
-        this.assetPath = assetPath;
-    }
-
-    public void create(Files files, Graphics graphics) {
-        this.texture = new Texture(files.internal(this.assetPath));
-    }
-
-    public void render(Input input, Graphics graphics, Camera camera, Batch batch) {
-        batch.draw(this.texture,
-                this.rectangle.x,
-                this.rectangle.y,
-                this.texture.getWidth(),
-                this.texture.getHeight());
-    }
-
-    @Override
-    public void dispose() {
-        this.texture.dispose();
-    }
-}
-
-class Background implements Disposable {
+class Area implements Disposable {
     private final int TILE_SIZE = 32;
-    private final Rectangle rectangle;
+    private final float x;
+    private final float y;
     private final String assetPath;
     private final String collisionAssetPath;
 
@@ -95,40 +54,32 @@ class Background implements Disposable {
     private Pixmap collisionPixmap;
     private Array<Tile> tiles;
 
-    static Background New(Graphics graphics) {
-        final String assetPath = "background_1.jpg";
-        final String collisionAssetPath = "background_1_collision.gif";
-        Rectangle r = new Rectangle(0f,
-                0f,
-                graphics.getWidth(),
-                graphics.getHeight());
-        return new Background(r, assetPath, collisionAssetPath);
-    }
-
-    private Background(Rectangle rectangle,
-                       String assetPath,
-                       String collisionAssetPath) {
-        this.rectangle = rectangle;
+    Area(float x,
+         float y,
+         String assetPath,
+         String collisionAssetPath) {
+        this.x = x;
+        this.y = y;
         this.assetPath = assetPath;
         this.collisionAssetPath = collisionAssetPath;
     }
 
-    public int getWidth() {
+    int getWidth() {
         return this.texture.getWidth();
     }
 
-    public int getHeight() {
+    int getHeight() {
         return this.texture.getHeight();
     }
 
-    public Tile collidesWith(Rectangle r, float offsetX, float offsetY) {
+    Tile collidesWith(Rectangle r, float offsetX, float offsetY) {
         Tile tile;
 
         for (int i = 0; i < 4; i++) {
             int m = i % 2;
             int n = i / 2;
             float osx = m == 0 ? offsetX : -1 * offsetX;
-            float osy = n == 1 ? offsetY : -1 * offsetY;
+            float osy = n == 1 ? (r.height - (2 * offsetY)) / 2 : -1 * offsetY;
             float pixX = r.x + (r.width * m) + osx;
             float pixY = this.collisionTexture.getHeight() - r.y - (r.height * n) + osy;
             int px = (int) Math.ceil(pixX / TILE_SIZE) - 1;
@@ -140,7 +91,7 @@ class Background implements Disposable {
                 // per pixel collision.
                 int leftX = (int) (r.x + offsetX);
                 int rightX = (int) (r.x + r.width - offsetX);
-                int leftY = (int) (this.collisionTexture.getHeight() - r.y - r.height + offsetY);
+                int leftY = (int) (this.collisionTexture.getHeight() - r.y - r.height + (r.height - (2 * offsetY)));
                 int rightY = (int) (this.collisionTexture.getHeight() - r.y - offsetY);
 
                 for (int y = leftY; y < rightY; y++) {
@@ -158,7 +109,7 @@ class Background implements Disposable {
         return null;
     }
 
-    public void create(Files files, Graphics graphics) {
+    void create(Files files) {
         this.texture = new Texture(files.internal(this.assetPath));
         this.collisionTexture = new Texture(files.internal(this.collisionAssetPath));
         tiles = new Array<>();
@@ -193,10 +144,10 @@ class Background implements Disposable {
         }
     }
 
-    public void render(Input input, Graphics graphics, Camera camera, Batch batch) {
+    void render(Batch batch) {
         batch.draw(this.texture,
-                this.rectangle.x,
-                this.rectangle.y,
+                this.x,
+                this.y,
                 this.texture.getWidth(),
                 this.texture.getHeight());
     }

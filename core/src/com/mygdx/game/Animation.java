@@ -37,7 +37,7 @@ class Animation {
         return new Animation(frameDurationInMilliseconds, regions);
     }
 
-    public void render(Input input, Graphics graphics, Camera camera, Batch batch) {
+    public void update(Input input, Graphics graphics, Camera camera) {
         if (TimeUtils.nanoTime() - this.lastUpdate > TimeUtils.millisToNanos(this.frameDurationInMilliseconds)) {
             this.lastUpdate = TimeUtils.nanoTime();
             this.currentFrameIndex = (this.currentFrameIndex + 1) % this.frames.size;
