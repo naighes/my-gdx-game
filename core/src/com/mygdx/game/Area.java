@@ -1,10 +1,8 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.Files;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.TextureData;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
@@ -42,26 +40,27 @@ class Tile {
     }
 }
 
-class Area implements Disposable {
+class Area {
     private final int TILE_SIZE = 32;
+    private final MyGdxGame game;
     private final float x;
     private final float y;
-    private final String assetPath;
-    private final String collisionAssetPath;
+    private final Texture texture;
+    private final Texture collisionTexture;
 
-    private Texture texture;
-    private Texture collisionTexture;
     private Pixmap collisionPixmap;
     private Array<Tile> tiles;
 
-    Area(float x,
+    Area(MyGdxGame game,
+         float x,
          float y,
-         String assetPath,
-         String collisionAssetPath) {
+         Texture texture,
+         Texture collisionTexture) {
+        this.game = game;
         this.x = x;
         this.y = y;
-        this.assetPath = assetPath;
-        this.collisionAssetPath = collisionAssetPath;
+        this.texture = texture;
+        this.collisionTexture = collisionTexture;
     }
 
     int getWidth() {
@@ -109,9 +108,7 @@ class Area implements Disposable {
         return null;
     }
 
-    void create(Files files) {
-        this.texture = new Texture(files.internal(this.assetPath));
-        this.collisionTexture = new Texture(files.internal(this.collisionAssetPath));
+    void init() {
         tiles = new Array<>();
         TextureData data = this.collisionTexture.getTextureData();
 
@@ -144,18 +141,11 @@ class Area implements Disposable {
         }
     }
 
-    void render(Batch batch) {
-        batch.draw(this.texture,
+    void render() {
+        this.game.getBatch().draw(this.texture,
                 this.x,
                 this.y,
                 this.texture.getWidth(),
                 this.texture.getHeight());
-    }
-
-    @Override
-    public void dispose() {
-        this.texture.dispose();
-        this.collisionPixmap.dispose();
-        this.collisionTexture.dispose();
     }
 }

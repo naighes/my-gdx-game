@@ -1,12 +1,12 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 enum Direction {
@@ -16,7 +16,7 @@ enum Direction {
 class Player extends Sprite {
     private final MyGdxGame game;
     private final Rectangle rectangle;
-    private final String assetPath;
+    private final Texture texture;
     private final float speed;
     private final float transitionSpeed;
     private final float offsetX;
@@ -29,41 +29,87 @@ class Player extends Sprite {
 
     private Animation currentAnimation;
 
-    private Direction currentDirection = Direction.NONE;
-    private boolean changingScenario = false;
+    private Direction currentDirection;
     private float currentSpeed;
 
     private Player(MyGdxGame game,
                    Rectangle rectangle,
-                   String assetPath,
+                   Direction direction,
+                   Texture texture,
                    float speed,
                    float offsetX,
                    float offsetY) {
         this.game = game;
         this.rectangle = rectangle;
-        this.assetPath = assetPath;
+        this.currentDirection = direction;
+        this.texture = texture;
         this.speed = speed;
         this.currentSpeed = speed;
-        this.transitionSpeed = speed / 8f;
+        this.transitionSpeed = speed / 4f;
         this.offsetX = offsetX;
         this.offsetY = offsetY;
+
+        this.downAnimation = Animation.New(this.texture,
+                200,
+                new Rectangle(0f, 0f, 0.25f, 0.25f),
+                new Rectangle(0.25f, 0f, 0.5f, 0.25f),
+                new Rectangle(0.5f, 0f, 0.75f, 0.25f),
+                new Rectangle(0.75f, 0f, 1f, 0.25f));
+        this.upAnimation = Animation.New(this.texture,
+                200,
+                new Rectangle(0f, 0.75f, 0.25f, 1f),
+                new Rectangle(0.25f, 0.75f, 0.5f, 1f),
+                new Rectangle(0.5f, 0.75f, 0.75f, 1f),
+                new Rectangle(0.75f, 0.75f, 1f, 1f));
+        this.leftAnimation = Animation.New(this.texture,
+                200,
+                new Rectangle(0f, 0.25f, 0.25f, 0.5f),
+                new Rectangle(0.25f, 0.25f, 0.5f, 0.5f),
+                new Rectangle(0.5f, 0.25f, 0.75f, 0.5f),
+                new Rectangle(0.75f, 0.25f, 1f, 0.5f));
+        this.rightAnimation = Animation.New(this.texture,
+                200,
+                new Rectangle(0f, 0.5f, 0.25f, 0.75f),
+                new Rectangle(0.25f, 0.5f, 0.5f, 0.75f),
+                new Rectangle(0.5f, 0.5f, 0.75f, 0.75f),
+                new Rectangle(0.75f, 0.5f, 1f, 0.75f));
+
+        switch (direction) {
+            case UP:
+                this.currentAnimation = this.upAnimation;
+                break;
+            case DOWN:
+                this.currentAnimation = this.downAnimation;
+                break;
+            case LEFT:
+                this.currentAnimation = this.leftAnimation;
+                break;
+            case RIGHT:
+                this.currentAnimation = this.rightAnimation;
+                break;
+            default:
+                this.currentAnimation = this.upAnimation;
+                break;
+        }
     }
 
-    static Player New(MyGdxGame game) {
+    static Player New(MyGdxGame game,
+                      Texture texture,
+                      Vector2 position,
+                      Direction direction) {
         final int width = 64;
         final int height = 64;
         final float speed = 240;
         final float offsetX = 14f;
         final float offsetY = 5f;
-        final String assetPath = "player_1.png";
-        // TODO: initial position needs to be configurable
-        Rectangle r = new Rectangle(0f,
-                0f,
+        Rectangle r = new Rectangle(position.x,
+                position.y,
                 width,
                 height);
         return new Player(game,
                 r,
-                assetPath,
+                direction,
+                texture,
                 speed,
                 offsetX,
                 offsetY);
@@ -85,57 +131,29 @@ class Player extends Sprite {
         this.rectangle.y = y;
     }
 
-    void create(Files files) {
-        Texture texture = new Texture(files.internal(this.assetPath));
-
-        this.downAnimation = Animation.New(texture,
-                200,
-                new Rectangle(0f, 0f, 0.25f, 0.25f),
-                new Rectangle(0.25f, 0f, 0.5f, 0.25f),
-                new Rectangle(0.5f, 0f, 0.75f, 0.25f),
-                new Rectangle(0.75f, 0f, 1f, 0.25f));
-        this.upAnimation = Animation.New(texture,
-                200,
-                new Rectangle(0f, 0.75f, 0.25f, 1f),
-                new Rectangle(0.25f, 0.75f, 0.5f, 1f),
-                new Rectangle(0.5f, 0.75f, 0.75f, 1f),
-                new Rectangle(0.75f, 0.75f, 1f, 1f));
-        this.leftAnimation = Animation.New(texture,
-                200,
-                new Rectangle(0f, 0.25f, 0.25f, 0.5f),
-                new Rectangle(0.25f, 0.25f, 0.5f, 0.5f),
-                new Rectangle(0.5f, 0.25f, 0.75f, 0.5f),
-                new Rectangle(0.75f, 0.25f, 1f, 0.5f));
-        this.rightAnimation = Animation.New(texture,
-                200,
-                new Rectangle(0f, 0.5f, 0.25f, 0.75f),
-                new Rectangle(0.25f, 0.5f, 0.5f, 0.75f),
-                new Rectangle(0.5f, 0.5f, 0.75f, 0.75f),
-                new Rectangle(0.75f, 0.5f, 1f, 0.75f));
-        this.currentAnimation = this.upAnimation;
-    }
-
     void update(Input input, Graphics graphics, Camera camera) {
         float prevX = this.rectangle.x;
         float prevY = this.rectangle.y;
         float dt = graphics.getDeltaTime();
 
         if (input.isTouched()) {
-            if (!this.changingScenario) {
-                this.currentDirection = getDirection(input, camera);
+            if (!this.game.isChangingScenario()) {
+                this.currentDirection = this.getDirection(input, camera);
                 this.currentSpeed = speed;
+            } else {
+                this.currentSpeed = transitionSpeed;
             }
         } else {
-            if (!this.changingScenario) {
+            if (!this.game.isChangingScenario()) {
                 this.currentDirection = Direction.NONE;
             } else {
                 this.currentSpeed = transitionSpeed;
             }
         }
 
+        this.handleScenario();
         this.handleMovement(dt);
         this.handleCollisions(prevX, prevY);
-        this.handleScenario();
 
         if (this.currentDirection != Direction.NONE) {
             this.currentAnimation.update(input, graphics, camera);
@@ -143,36 +161,31 @@ class Player extends Sprite {
     }
 
     private void handleScenario() {
-        if (!this.changingScenario) {
-            Scenario currentScenario = this.game.getCurrentScenario();
+        Scenario currentScenario = this.game.getCurrentScenario();
 
-            if (currentScenario != null) {
-                Endpoint endpoint = currentScenario
-                        .checkConnectionHit(this.rectangle, this.offsetX, this.offsetY);
+        if (!this.game.isChangingScenario()) {
+            Endpoint endpoint = currentScenario
+                    .checkConnectionHit(this.rectangle, this.offsetX, this.offsetY);
 
-                if (endpoint != null) {
-                    this.changingScenario = true;
-                    this.game.setCurrentScenario(this.game.getScenario(endpoint.scenarioName));
-                    this.rectangle.x = (endpoint.collisionArea.x + (endpoint.collisionArea.width / 2f)) - (this.rectangle.width / 2f) + this.offsetX;
-                    this.rectangle.y = (endpoint.collisionArea.y + (endpoint.collisionArea.height / 2f)) - (this.rectangle.height / 2f) + this.offsetY;
-                }
+            if (endpoint != null) {
+                this.game.setCurrentScenario(
+                        endpoint.scenarioName,
+                        new Vector2((endpoint.collisionArea.x + (endpoint.collisionArea.width / 2f)) - (this.rectangle.width / 2f) + this.offsetX,
+                                (endpoint.collisionArea.y + (endpoint.collisionArea.height / 2f)) - (this.rectangle.height / 2f) + this.offsetY),
+                        this.currentDirection);
             }
         } else {
-            Scenario currentScenario = this.game.getCurrentScenario();
+            Endpoint endpoint = currentScenario
+                    .checkConnectionLeft(this.rectangle, this.offsetX, this.offsetY);
 
-            if (currentScenario != null) {
-                Endpoint endpoint = currentScenario
-                        .checkConnectionLeft(this.rectangle, this.offsetX, this.offsetY);
-
-                if (endpoint == null) {
-                    this.changingScenario = false;
-                }
+            if (endpoint == null) {
+                this.game.scenarioChanged();
             }
         }
     }
 
     private void handleCollisions(float prevX, float prevY) {
-        if (this.changingScenario) {
+        if (this.game.isChangingScenario()) {
             return;
         }
 

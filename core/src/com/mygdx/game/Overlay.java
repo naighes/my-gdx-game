@@ -1,44 +1,30 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.Files;
-import com.badlogic.gdx.Graphics;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.utils.Disposable;
 
-class Overlay implements Disposable {
+class Overlay {
+    private final MyGdxGame game;
     private final float x;
     private final float y;
-    private final String assetPath;
+    private final Texture texture;
 
-    private Texture texture;
-
-    Overlay(float x,
+    Overlay(MyGdxGame game,
+            float x,
             float y,
-            String assetPath) {
+            Texture texture) {
+        this.game = game;
         this.x = x;
         this.y = y;
-        this.assetPath = assetPath;
+        this.texture = texture;
     }
 
-    void create(Files files, Graphics graphics) {
-        this.texture = new Texture(files.internal(this.assetPath));
-    }
-
-    void render(Input input, Graphics graphics, Camera camera, Batch batch) {
+    void render() {
         if (this.texture != null) {
-            batch.draw(this.texture,
+            this.game.getBatch().draw(this.texture,
                     this.x,
                     this.y,
                     this.texture.getWidth(),
                     this.texture.getHeight());
         }
-    }
-
-    @Override
-    public void dispose() {
-        this.texture.dispose();
     }
 }
