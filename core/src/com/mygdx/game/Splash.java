@@ -39,7 +39,7 @@ public class Splash extends ScreenAdapter {
             case 1:
             case 2:
                 if (this.previousScenario != null) {
-                    this.previousScenario.draw();
+                    this.previousScenario.render(delta);
                 }
                 break;
             case 3:

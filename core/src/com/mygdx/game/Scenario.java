@@ -3,7 +3,6 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
@@ -34,8 +33,8 @@ class ScenarioDescriptor {
 }
 
 public class Scenario extends ScreenAdapter {
+    public final String name;
     private final MyGdxGame game;
-    private final String name;
     private final float x;
     private final float y;
     private final Vector2 playerPosition;
@@ -87,26 +86,6 @@ public class Scenario extends ScreenAdapter {
         return this.player;
     }
 
-    Endpoint checkConnectionHit(Rectangle rectangle, float offsetX, float offsetY) {
-        for (Junction junction : this.game.getConnections(this.name)) {
-            Endpoint endpoint = junction.contains(rectangle, offsetX, offsetY);
-            if (endpoint != null) {
-                return endpoint;
-            }
-        }
-        return null;
-    }
-
-    Endpoint checkConnectionLeft(Rectangle rectangle, float offsetX, float offsetY) {
-        for (Junction junction : this.game.getConnections(this.name)) {
-            Endpoint endpoint = junction.intersect(rectangle, offsetX, offsetY);
-            if (endpoint != null) {
-                return endpoint;
-            }
-        }
-        return null;
-    }
-
     @Override
     public void show() {
         super.show();
@@ -124,7 +103,8 @@ public class Scenario extends ScreenAdapter {
                 this,
                 playerTexture,
                 this.playerPosition,
-                this.playerDirection);
+                this.playerDirection,
+                PlayerState.ENTERING_SCENARIO);
 
         for (GuestDescriptor guestDescriptor : this.guestDescriptors) {
             Texture guestTexture = this.game.getAssetManager().get(guestDescriptor.assetPath);
@@ -163,16 +143,16 @@ public class Scenario extends ScreenAdapter {
         super.render(delta);
 
         this.camera.update(this);
-        this.player.update(Gdx.input, Gdx.graphics, this.camera.getInnerCamera());
+        this.player.update(delta);
 
         for (Guest guest : this.guests) {
-            guest.update(Gdx.input, Gdx.graphics, this.camera.getInnerCamera());
+            guest.update(delta);
         }
 
         this.draw();
     }
 
-    void draw() {
+    private void draw() {
         this.game.getBatch().setProjectionMatrix(this.camera.getInnerCamera().combined);
         this.game.getBatch().begin();
         this.getArea().render();
@@ -240,5 +220,9 @@ public class Scenario extends ScreenAdapter {
 
     boolean isInitialized() {
         return this.initialized;
+    }
+
+    public GameCamera getCamera() {
+        return camera;
     }
 }

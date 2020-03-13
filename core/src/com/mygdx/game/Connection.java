@@ -45,6 +45,12 @@ class Endpoint {
 
         return pl < er && pr > el && pd < eu && pu > ed;
     }
+
+    public Vector2 getCenterAgainst(Player player) {
+        Rectangle bounds = player.getBoundingRectangle();
+        return new Vector2((this.collisionArea.x + (this.collisionArea.width / 2f)) - (bounds.width / 2f) + player.getOffsetX(),
+                (this.collisionArea.y + (this.collisionArea.height / 2f)) - (bounds.height / 2f) + player.getOffsetY());
+    }
 }
 
 class Junction {
@@ -90,6 +96,32 @@ class Connections {
         }
 
         return new Array<>();
+    }
+
+    Endpoint checkConnectionLeft(String scenarioName,
+                                 Rectangle rectangle,
+                                 float offsetX,
+                                 float offsetY) {
+        for (Junction junction : this.get(scenarioName)) {
+            Endpoint endpoint = junction.intersect(rectangle, offsetX, offsetY);
+            if (endpoint != null) {
+                return endpoint;
+            }
+        }
+        return null;
+    }
+
+    Endpoint checkConnectionHit(String scenarioName,
+                                Rectangle rectangle,
+                                float offsetX,
+                                float offsetY) {
+        for (Junction junction : this.connections.get(scenarioName)) {
+            Endpoint endpoint = junction.contains(rectangle, offsetX, offsetY);
+            if (endpoint != null) {
+                return endpoint;
+            }
+        }
+        return null;
     }
 }
 

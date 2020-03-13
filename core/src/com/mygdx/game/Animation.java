@@ -31,10 +31,18 @@ class Animation {
         Array<TextureRegion> regions = new Array<>();
 
         for (Rectangle r : frames) {
-            regions.add(new TextureRegion(texture, r.x, r.y, r.width, r.height));
+            regions.add(getTextureRegion(texture, r));
         }
 
         return new Animation(frameDurationInMilliseconds, regions);
+    }
+
+    static Animation New(long frameDurationInMilliseconds, TextureRegion... regions) {
+        return new Animation(frameDurationInMilliseconds, new Array<>(regions));
+    }
+
+    static TextureRegion getTextureRegion(Texture texture, Rectangle r) {
+        return new TextureRegion(texture, r.x, r.y, r.width, r.height);
     }
 
     public void update(Input input, Graphics graphics, Camera camera) {
