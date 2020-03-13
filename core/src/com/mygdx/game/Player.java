@@ -15,6 +15,7 @@ enum Direction {
 
 class Player extends Sprite {
     private final MyGdxGame game;
+    private final Scenario scenario;
     private final Rectangle rectangle;
     private final Texture texture;
     private final float speed;
@@ -33,6 +34,7 @@ class Player extends Sprite {
     private float currentSpeed;
 
     private Player(MyGdxGame game,
+                   Scenario scenario,
                    Rectangle rectangle,
                    Direction direction,
                    Texture texture,
@@ -40,6 +42,7 @@ class Player extends Sprite {
                    float offsetX,
                    float offsetY) {
         this.game = game;
+        this.scenario = scenario;
         this.rectangle = rectangle;
         this.currentDirection = direction;
         this.texture = texture;
@@ -94,6 +97,7 @@ class Player extends Sprite {
     }
 
     static Player New(MyGdxGame game,
+                      Scenario scenario,
                       Texture texture,
                       Vector2 position,
                       Direction direction) {
@@ -107,6 +111,7 @@ class Player extends Sprite {
                 width,
                 height);
         return new Player(game,
+                scenario,
                 r,
                 direction,
                 texture,
@@ -161,7 +166,7 @@ class Player extends Sprite {
     }
 
     private void handleScenario() {
-        Scenario currentScenario = this.game.getCurrentScenario();
+        Scenario currentScenario = this.scenario;
 
         if (!this.game.isChangingScenario()) {
             Endpoint endpoint = currentScenario
@@ -189,7 +194,7 @@ class Player extends Sprite {
             return;
         }
 
-        Tile tile = this.game.getCurrentScenario()
+        Tile tile = this.scenario
                 .getArea()
                 .collidesWith(this.rectangle,
                         this.offsetX,

@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -49,10 +50,6 @@ public class MyGdxGame extends Game {
         this.changingScenario = false;
     }
 
-    Scenario getCurrentScenario() {
-        return this.currentScenario;
-    }
-
     Array<Junction> getConnections(String scenarioName) {
         return this.connections.get(scenarioName);
     }
@@ -60,10 +57,7 @@ public class MyGdxGame extends Game {
     void setCurrentScenario(String scenarioName,
                             Vector2 playerPosition,
                             Direction playerDirection) {
-        if (this.currentScenario != null) {
-            this.currentScenario.dispose();
-        }
-
+        Scenario previousScenario = this.currentScenario;
         this.changingScenario = true;
         ScenarioDescriptor descriptor = this.descriptors.get(scenarioName);
         this.currentScenario = new Scenario(
@@ -78,7 +72,10 @@ public class MyGdxGame extends Game {
                 descriptor.overlayAssetPath,
                 descriptor.playerAssetPath
         );
-        this.setScreen(new Splash(this, this.currentScenario));
+
+        this.setScreen(new Splash(this,
+                previousScenario,
+                this.currentScenario));
     }
 
     AssetManager getAssetManager() {
@@ -121,6 +118,7 @@ public class MyGdxGame extends Game {
 
     @Override
     public void render() {
+        Color c = Color.BLACK;
         Gdx.gl.glClearColor(0f, 0f, 0f, 0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 

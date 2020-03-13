@@ -42,6 +42,7 @@ public class Scenario extends ScreenAdapter {
     private final String playerAssetPath;
     private final GameCamera camera;
 
+    private boolean initialized = false;
     private Player player;
     private Area area;
     private Overlay overlay;
@@ -101,8 +102,17 @@ public class Scenario extends ScreenAdapter {
     public void show() {
         super.show();
 
+        init();
+    }
+
+    void init() {
+        if (this.initialized) {
+            return;
+        }
+
         Texture playerTexture = this.game.getAssetManager().get(this.playerAssetPath);
         this.player = Player.New(this.game,
+                this,
                 playerTexture,
                 this.playerPosition,
                 this.playerDirection);
@@ -124,6 +134,8 @@ public class Scenario extends ScreenAdapter {
         if (overlayTexture != null) {
             this.overlay = new Overlay(this.game, this.x, this.y, overlayTexture);
         }
+
+        this.initialized = true;
     }
 
     @Override
@@ -133,6 +145,10 @@ public class Scenario extends ScreenAdapter {
         this.camera.update(this);
         this.player.update(Gdx.input, Gdx.graphics, this.camera.getInnerCamera());
 
+        this.draw();
+    }
+
+    void draw() {
         this.game.getBatch().setProjectionMatrix(this.camera.getInnerCamera().combined);
         this.game.getBatch().begin();
         this.getArea().render();
@@ -188,5 +204,9 @@ public class Scenario extends ScreenAdapter {
     @Override
     public void dispose() {
         this.unloadAssets();
+    }
+
+    boolean isInitialized() {
+        return this.initialized;
     }
 }
