@@ -70,7 +70,8 @@ public class MyGdxGame extends Game {
                 descriptor.assetPath,
                 descriptor.collisionAssetPath,
                 descriptor.overlayAssetPath,
-                descriptor.playerAssetPath
+                descriptor.playerAssetPath,
+                descriptor.guests
         );
 
         this.setScreen(new Splash(this,
@@ -90,6 +91,13 @@ public class MyGdxGame extends Game {
     public void create() {
         this.batch = new SpriteBatch();
 
+        Array<GuestDescriptor> forest1Guests = new Array<>();
+        forest1Guests.add(new GuestDescriptor(
+                "guest_1",
+                new Vector2(980f, 250f),
+                "guest_1.png"
+        ));
+
         this.descriptors.put("forest_1",
                 new ScenarioDescriptor(
                         "forest_1",
@@ -97,7 +105,8 @@ public class MyGdxGame extends Game {
                         "background_1.jpg",
                         "background_1_collision.gif",
                         "background_1_overlay.png",
-                        "player_1.png"
+                        "player_1.png",
+                        forest1Guests
                 ));
 
         this.descriptors.put("inner_castle_1",
@@ -107,7 +116,8 @@ public class MyGdxGame extends Game {
                         "inner_castle_1.png",
                         "inner_castle_1_collision.gif",
                         null,
-                        "player_1.png"
+                        "player_1.png",
+                        new Array<GuestDescriptor>()
                 ));
 
         ScenarioDescriptor descriptor = this.descriptors.get("forest_1");

@@ -5,6 +5,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 class ScenarioDescriptor {
     ScenarioDescriptor(String name,
@@ -12,13 +13,15 @@ class ScenarioDescriptor {
                        String assetPath,
                        String collisionAssetPath,
                        String overlayAssetPath,
-                       String playerAssetPath) {
+                       String playerAssetPath,
+                       Array<GuestDescriptor> guests) {
         this.name = name;
         this.playerPosition = playerPosition;
         this.assetPath = assetPath;
         this.collisionAssetPath = collisionAssetPath;
         this.overlayAssetPath = overlayAssetPath;
         this.playerAssetPath = playerAssetPath;
+        this.guests = guests;
     }
 
     public final String name;
@@ -27,6 +30,7 @@ class ScenarioDescriptor {
     public final String collisionAssetPath;
     public final String overlayAssetPath;
     public final String playerAssetPath;
+    public final Array<GuestDescriptor> guests;
 }
 
 public class Scenario extends ScreenAdapter {
@@ -41,6 +45,8 @@ public class Scenario extends ScreenAdapter {
     private final String overlayAssetPath;
     private final String playerAssetPath;
     private final GameCamera camera;
+    private final Array<GuestDescriptor> guestDescriptors;
+    private final Array<Guest> guests;
 
     private boolean initialized = false;
     private Player player;
@@ -56,7 +62,8 @@ public class Scenario extends ScreenAdapter {
              String assetPath,
              String collisionAssetPath,
              String overlayAssetPath,
-             String playerAssetPath) {
+             String playerAssetPath,
+             Array<GuestDescriptor> guests) {
         this.game = game;
         this.name = name;
         this.x = x;
@@ -68,6 +75,8 @@ public class Scenario extends ScreenAdapter {
         this.overlayAssetPath = overlayAssetPath;
         this.playerAssetPath = playerAssetPath;
         this.camera = new GameCamera();
+        this.guestDescriptors = guests;
+        this.guests = new Array<>();
     }
 
     Area getArea() {
@@ -116,6 +125,17 @@ public class Scenario extends ScreenAdapter {
                 playerTexture,
                 this.playerPosition,
                 this.playerDirection);
+
+        for (GuestDescriptor guestDescriptor : this.guestDescriptors) {
+            Texture guestTexture = this.game.getAssetManager().get(guestDescriptor.assetPath);
+            Guest guest = Guest.New(this.game,
+                    this,
+                    guestTexture,
+                    guestDescriptor.position,
+                    Direction.UP);
+            this.guests.add(guest);
+        }
+
         Texture texture = this.game.getAssetManager().get(this.assetPath);
         Texture collisionTexture = this.game.getAssetManager().get(this.collisionAssetPath);
         Texture overlayTexture = null;
@@ -145,6 +165,10 @@ public class Scenario extends ScreenAdapter {
         this.camera.update(this);
         this.player.update(Gdx.input, Gdx.graphics, this.camera.getInnerCamera());
 
+        for (Guest guest : this.guests) {
+            guest.update(Gdx.input, Gdx.graphics, this.camera.getInnerCamera());
+        }
+
         this.draw();
     }
 
@@ -153,6 +177,10 @@ public class Scenario extends ScreenAdapter {
         this.game.getBatch().begin();
         this.getArea().render();
         this.player.render();
+
+        for (Guest guest : this.guests) {
+            guest.render();
+        }
 
         if (this.overlay != null) {
             overlay.render();
@@ -188,6 +216,10 @@ public class Scenario extends ScreenAdapter {
 
         if (this.overlayAssetPath != null) {
             this.game.getAssetManager().load(this.overlayAssetPath, Texture.class);
+        }
+
+        for (GuestDescriptor guest : this.guestDescriptors) {
+            this.game.getAssetManager().load(guest.assetPath, Texture.class);
         }
     }
 
