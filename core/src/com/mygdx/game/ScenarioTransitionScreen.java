@@ -6,16 +6,16 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 
-public class Splash extends ScreenAdapter {
+public class ScenarioTransitionScreen extends ScreenAdapter {
     private final MyGdxGame game;
     private final Scenario nextScenario;
     private final FadeController controller;
 
     private Scenario previousScenario;
 
-    Splash(MyGdxGame game,
-           Scenario previousScenario,
-           Scenario nextScenario) {
+    ScenarioTransitionScreen(MyGdxGame game,
+                             Scenario previousScenario,
+                             Scenario nextScenario) {
         this.game = game;
         this.previousScenario = previousScenario;
         this.nextScenario = nextScenario;

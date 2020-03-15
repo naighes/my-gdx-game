@@ -1,0 +1,410 @@
+{
+  "descriptors": {
+    "forest_1": {
+      "name": "forest_1",
+      "playerInitialPosition": {
+        "x": 880.0,
+        "y": 50.0
+      },
+      "assetPath": "background_1.jpg",
+      "collisionAssetPath": "background_1_collision.gif",
+      "overlayAssetPath": "background_1_overlay.png",
+      "guests": [
+        {
+          "name": "guest_1",
+          "position": {
+            "x": 980.0,
+            "y": 320.0
+          },
+          "width": 64,
+          "height": 64,
+          "offsetX": 14.0,
+          "offsetY": 5.0,
+          "speed": 10.0,
+          "animations": {
+            "frameDuration": 0.25,
+            "assetPath": "guest_1.png",
+            "animations": {
+              "down": [
+                {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "width": 0.25,
+                  "height": 0.25
+                },
+                {
+                  "x": 0.25,
+                  "y": 0.0,
+                  "width": 0.5,
+                  "height": 0.25
+                },
+                {
+                  "x": 0.5,
+                  "y": 0.0,
+                  "width": 0.75,
+                  "height": 0.25
+                },
+                {
+                  "x": 0.75,
+                  "y": 0.0,
+                  "width": 1.0,
+                  "height": 0.25
+                }
+              ],
+              "up": [
+                {
+                  "x": 0.0,
+                  "y": 0.75,
+                  "width": 0.25,
+                  "height": 1.0
+                },
+                {
+                  "x": 0.25,
+                  "y": 0.75,
+                  "width": 0.5,
+                  "height": 1.0
+                },
+                {
+                  "x": 0.5,
+                  "y": 0.75,
+                  "width": 0.75,
+                  "height": 1.0
+                },
+                {
+                  "x": 0.75,
+                  "y": 0.75,
+                  "width": 1.0,
+                  "height": 1.0
+                }
+              ],
+              "left": [
+                {
+                  "x": 0.0,
+                  "y": 0.25,
+                  "width": 0.25,
+                  "height": 0.5
+                },
+                {
+                  "x": 0.25,
+                  "y": 0.25,
+                  "width": 0.5,
+                  "height": 0.5
+                },
+                {
+                  "x": 0.5,
+                  "y": 0.25,
+                  "width": 0.75,
+                  "height": 0.5
+                },
+                {
+                  "x": 0.75,
+                  "y": 0.25,
+                  "width": 1.0,
+                  "height": 0.5
+                }
+              ],
+              "right": [
+                {
+                  "x": 0.0,
+                  "y": 0.5,
+                  "width": 0.25,
+                  "height": 0.75
+                },
+                {
+                  "x": 0.25,
+                  "y": 0.5,
+                  "width": 0.5,
+                  "height": 0.75
+                },
+                {
+                  "x": 0.5,
+                  "y": 0.5,
+                  "width": 0.75,
+                  "height": 0.75
+                },
+                {
+                  "x": 0.75,
+                  "y": 0.5,
+                  "width": 1.0,
+                  "height": 0.75
+                }
+              ]
+            }
+          },
+          "conversations": [
+            "Hello dude, my name is Max. I'm hanging around here to look for some new friend!"
+          ]
+        }
+      ],
+      "player": {
+        "width": 64,
+        "height": 64,
+        "offsetX": 14.0,
+        "offsetY": 5.0,
+        "speed": 240,
+        "transitionSpeed": 60,
+        "animations": {
+          "frameDuration": 0.25,
+          "assetPath": "player_1.png",
+          "animations": {
+            "down": [
+              {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 0.25,
+                "height": 0.25
+              },
+              {
+                "x": 0.25,
+                "y": 0.0,
+                "width": 0.5,
+                "height": 0.25
+              },
+              {
+                "x": 0.5,
+                "y": 0.0,
+                "width": 0.75,
+                "height": 0.25
+              },
+              {
+                "x": 0.75,
+                "y": 0.0,
+                "width": 1.0,
+                "height": 0.25
+              }
+            ],
+            "up": [
+              {
+                "x": 0.0,
+                "y": 0.75,
+                "width": 0.25,
+                "height": 1.0
+              },
+              {
+                "x": 0.25,
+                "y": 0.75,
+                "width": 0.5,
+                "height": 1.0
+              },
+              {
+                "x": 0.5,
+                "y": 0.75,
+                "width": 0.75,
+                "height": 1.0
+              },
+              {
+                "x": 0.75,
+                "y": 0.75,
+                "width": 1.0,
+                "height": 1.0
+              }
+            ],
+            "left": [
+              {
+                "x": 0.0,
+                "y": 0.25,
+                "width": 0.25,
+                "height": 0.5
+              },
+              {
+                "x": 0.25,
+                "y": 0.25,
+                "width": 0.5,
+                "height": 0.5
+              },
+              {
+                "x": 0.5,
+                "y": 0.25,
+                "width": 0.75,
+                "height": 0.5
+              },
+              {
+                "x": 0.75,
+                "y": 0.25,
+                "width": 1.0,
+                "height": 0.5
+              }
+            ],
+            "right": [
+              {
+                "x": 0.0,
+                "y": 0.5,
+                "width": 0.25,
+                "height": 0.75
+              },
+              {
+                "x": 0.25,
+                "y": 0.5,
+                "width": 0.5,
+                "height": 0.75
+              },
+              {
+                "x": 0.5,
+                "y": 0.5,
+                "width": 0.75,
+                "height": 0.75
+              },
+              {
+                "x": 0.75,
+                "y": 0.5,
+                "width": 1.0,
+                "height": 0.75
+              }
+            ]
+          }
+        }
+      }
+    },
+    "inner_castle_1": {
+      "name": "inner_castle_1",
+      "playerInitialPosition": {
+        "x": 1310.0,
+        "y": 410.0
+      },
+      "assetPath": "inner_castle_1.png",
+      "collisionAssetPath": "inner_castle_1_collision.gif",
+      "overlayAssetPath": null,
+      "guests": [],
+      "player": {
+        "width": 64,
+        "height": 64,
+        "offsetX": 14.0,
+        "offsetY": 5.0,
+        "speed": 240,
+        "transitionSpeed": 60,
+        "animations": {
+          "frameDuration": 0.25,
+          "assetPath": "player_1.png",
+          "animations": {
+            "down": [
+              {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 0.25,
+                "height": 0.25
+              },
+              {
+                "x": 0.25,
+                "y": 0.0,
+                "width": 0.5,
+                "height": 0.25
+              },
+              {
+                "x": 0.5,
+                "y": 0.0,
+                "width": 0.75,
+                "height": 0.25
+              },
+              {
+                "x": 0.75,
+                "y": 0.0,
+                "width": 1.0,
+                "height": 0.25
+              }
+            ],
+            "up": [
+              {
+                "x": 0.0,
+                "y": 0.75,
+                "width": 0.25,
+                "height": 1.0
+              },
+              {
+                "x": 0.25,
+                "y": 0.75,
+                "width": 0.5,
+                "height": 1.0
+              },
+              {
+                "x": 0.5,
+                "y": 0.75,
+                "width": 0.75,
+                "height": 1.0
+              },
+              {
+                "x": 0.75,
+                "y": 0.75,
+                "width": 1.0,
+                "height": 1.0
+              }
+            ],
+            "left": [
+              {
+                "x": 0.0,
+                "y": 0.25,
+                "width": 0.25,
+                "height": 0.5
+              },
+              {
+                "x": 0.25,
+                "y": 0.25,
+                "width": 0.5,
+                "height": 0.5
+              },
+              {
+                "x": 0.5,
+                "y": 0.25,
+                "width": 0.75,
+                "height": 0.5
+              },
+              {
+                "x": 0.75,
+                "y": 0.25,
+                "width": 1.0,
+                "height": 0.5
+              }
+            ],
+            "right": [
+              {
+                "x": 0.0,
+                "y": 0.5,
+                "width": 0.25,
+                "height": 0.75
+              },
+              {
+                "x": 0.25,
+                "y": 0.5,
+                "width": 0.5,
+                "height": 0.75
+              },
+              {
+                "x": 0.5,
+                "y": 0.5,
+                "width": 0.75,
+                "height": 0.75
+              },
+              {
+                "x": 0.75,
+                "y": 0.5,
+                "width": 1.0,
+                "height": 0.75
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "endpoint1": {
+        "scenarioName": "forest_1",
+        "collisionArea": {
+          "x": 877.0,
+          "y": 910.0,
+          "width": 76.0,
+          "height": 64.0
+        }
+      },
+      "endpoint2": {
+        "scenarioName": "inner_castle_1",
+        "collisionArea": {
+          "x": 1262,
+          "y": 378.0,
+          "width": 142.0,
+          "height": 64.0
+        }
+      }
+    }
+  ]
+}

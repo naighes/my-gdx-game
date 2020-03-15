@@ -1,164 +1,43 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.mygdx.game.descriptors.GuestDescriptor;
 
+import java.util.Map;
 import java.util.Random;
 
-class GuestDescriptor {
-    GuestDescriptor(String name,
-                    Vector2 position,
-                    String assetPath) {
-        this.name = name;
-        this.position = position;
-        this.assetPath = assetPath;
-    }
-
-    public final String name;
-    final Vector2 position;
-    final String assetPath;
-}
-
-class Guest extends Character {
-    private final float FRAME_DURATION = 0.25f;
-
+public class Guest extends Character {
     private final MyGdxGame game;
-    private final Texture texture;
-    private final ObjectMap<String, com.badlogic.gdx.graphics.g2d.Animation<TextureRegion>> animations;
-    private final ObjectMap<Direction, com.badlogic.gdx.graphics.g2d.Animation<TextureRegion>> directionToAnimation;
-
-    private float currentSpeed;
-    private com.badlogic.gdx.graphics.g2d.Animation<TextureRegion> currentAnimation;
-    private Direction currentDirection;
-    private float currentAnimationElapsedTime = 0f;
-    private final float speed;
-
-    private float timeSinceLastChange;
+    private final Map<String, Animation<TextureRegion>> animations;
+    private final ObjectMap<Direction, Animation<TextureRegion>> directionToAnimation;
+    private final GuestDescriptor descriptor;
     private final Random rnd = new Random();
 
-    static Guest New(MyGdxGame game,
-                     Scenario scenario,
-                     Texture texture,
-                     Vector2 position,
-                     Direction direction) {
-        final int width = 64;
-        final int height = 64;
-        final float speed = 100;
-        final float offsetX = 14f;
-        final float offsetY = 5f;
-        Rectangle r = new Rectangle(position.x,
-                position.y,
-                width,
-                height);
-        return new Guest(game,
-                scenario,
-                r,
-                direction,
-                texture,
-                speed,
-                offsetX,
-                offsetY);
-    }
+    private float currentSpeed;
+    private Animation<TextureRegion> currentAnimation;
+    private Direction currentDirection;
+    private float currentAnimationElapsedTime = 0f;
 
-    private Guest(MyGdxGame game,
-                  Scenario scenario,
-                  Rectangle bounds,
-                  Direction direction,
-                  Texture texture,
-                  float speed,
-                  float offsetX,
-                  float offsetY) {
-        super(scenario, offsetX, offsetY);
+    private float timeSinceLastChange;
+    private int nextDirectionChangeAt = 0;
+    private boolean conversationInPlace = false;
+    private float timeSinceLastConversation = 2f;
+
+    public Guest(MyGdxGame game,
+                 Scenario scenario,
+                 Vector2 position,
+                 Direction direction,
+                 GuestDescriptor descriptor) {
+        super(scenario, descriptor.offsetX, descriptor.offsetY);
         this.game = game;
         this.currentDirection = direction;
-        this.texture = texture;
-        this.speed = speed;
-        this.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
-        this.animations = new ObjectMap<>();
-        this.animations.put("down",
-                new com.badlogic.gdx.graphics.g2d.Animation<>(
-                        FRAME_DURATION,
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0f, 0f, 0.25f, 0.25f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.25f, 0f, 0.5f, 0.25f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.5f, 0f, 0.75f, 0.25f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.75f, 0f, 1f, 0.25f)
-                        ))
-        );
-        this.animations.put("up",
-                new com.badlogic.gdx.graphics.g2d.Animation<>(
-                        FRAME_DURATION,
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0f, 0.75f, 0.25f, 1f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.25f, 0.75f, 0.5f, 1f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.5f, 0.75f, 0.75f, 1f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.75f, 0.75f, 1f, 1f)
-                        ))
-        );
-        this.animations.put("left",
-                new com.badlogic.gdx.graphics.g2d.Animation<>(
-                        FRAME_DURATION,
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0f, 0.25f, 0.25f, 0.5f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.25f, 0.25f, 0.5f, 0.5f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.5f, 0.25f, 0.75f, 0.5f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.75f, 0.25f, 1f, 0.5f)
-                        ))
-        );
-        this.animations.put("right",
-                new com.badlogic.gdx.graphics.g2d.Animation<>(
-                        FRAME_DURATION,
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0f, 0.5f, 0.25f, 0.75f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.25f, 0.5f, 0.5f, 0.75f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.5f, 0.5f, 0.75f, 0.75f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.75f, 0.5f, 1f, 0.75f)
-                        ))
-        );
+        this.descriptor = descriptor;
+        this.animations = descriptor.animations.getAnimations(game.getAssetManager());
+        this.setBounds(position.x, position.y, descriptor.width, descriptor.height);
 
         this.directionToAnimation = new ObjectMap<>();
         this.directionToAnimation.put(Direction.DOWN, this.animations.get("down"));
@@ -180,10 +59,16 @@ class Guest extends Character {
         this.setMovement(delta, this.currentSpeed, this.currentDirection);
         this.currentAnimation = this.directionToAnimation.get(this.currentDirection);
         this.handleCollisions(prevX, prevY);
+
+        if (!this.conversationInPlace) {
+            this.timeSinceLastConversation += delta;
+        }
     }
 
     float getSpeed() {
-        return this.speed;
+        return this.conversationInPlace
+                ? 0f
+                : this.descriptor.speed;
     }
 
     private void handleCollisions(float prevX, float prevY) {
@@ -209,7 +94,12 @@ class Guest extends Character {
     }
 
     private Direction getDirection(float delta) {
-        if (this.timeSinceLastChange > 10f) {
+        if (this.timeSinceLastChange > this.nextDirectionChangeAt && !this.conversationInPlace) {
+            // it'll automatically change direction in a range
+            // between 2 and 10 seconds
+            final int max = 10;
+            final int min = 2;
+            this.nextDirectionChangeAt = this.rnd.nextInt((max - min) + 1) + min;
             this.timeSinceLastChange = 0f;
             return randDirection();
         } else {
@@ -228,6 +118,7 @@ class Guest extends Character {
             case 3:
                 return Direction.LEFT;
         }
+
         return Direction.RIGHT;
     }
 
@@ -236,8 +127,22 @@ class Guest extends Character {
         TextureRegion frame = this.currentSpeed != 0f
                 ? this.currentAnimation.getKeyFrame(this.currentAnimationElapsedTime, true)
                 : this.currentAnimation.getKeyFrames()[0];
-        this.game.getBatch().draw(frame,
-                this.getX(),
-                this.getY());
+        this.setRegion(frame);
+        this.draw(this.game.getBatch());
+    }
+
+    public boolean wannaTalk() {
+        return this.timeSinceLastConversation > 2f && this.descriptor.conversations.length > 0;
+    }
+
+    public void talk() {
+        this.conversationInPlace = true;
+        this.getScenario().startConversation(this.descriptor.conversations,
+                this);
+    }
+
+    void leaveConversation() {
+        this.timeSinceLastConversation = 0f;
+        this.conversationInPlace = false;
     }
 }

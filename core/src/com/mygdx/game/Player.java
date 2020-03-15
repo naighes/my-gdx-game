@@ -1,198 +1,42 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.mygdx.game.controllers.PlayerState;
+import com.mygdx.game.descriptors.PlayerDescriptor;
+
+import java.util.Map;
 
 enum Direction {
     LEFT, RIGHT, UP, DOWN
 }
 
-enum PlayerState {
-    EXITING_SCENARIO,
-    ENTERING_SCENARIO,
-    NONE
-}
-
-class PlayerStateController {
+public class Player extends Character {
     private final MyGdxGame game;
-    private final Player player;
-
-    private PlayerState state;
-
-    PlayerStateController(MyGdxGame game,
-                          Player player,
-                          PlayerState initialState) {
-        this.game = game;
-        this.player = player;
-        this.state = initialState;
-    }
-
-    void update() {
-        Rectangle bounds = this.player.getBoundingRectangle();
-
-        if (this.state == PlayerState.NONE) {
-            // check if the player attempts to enter a new scenario
-            Endpoint endpoint = this.game.getConnections()
-                    .checkConnectionHit(this.player.getScenario().name,
-                            bounds,
-                            this.player.getOffsetX(),
-                            this.player.getOffsetY());
-
-            if (endpoint != null) {
-                this.state = PlayerState.EXITING_SCENARIO;
-                this.game.setCurrentScenario(
-                        endpoint.scenarioName,
-                        endpoint.getCenterAgainst(this.player),
-                        this.player.getCurrentDirection());
-            }
-
-            return;
-        }
-
-        if (this.state == PlayerState.ENTERING_SCENARIO) {
-            // check if the player is into the new scenario and
-            // out of the connection
-            Endpoint endpoint = this.game.getConnections()
-                    .checkConnectionLeft(this.player.getScenario().name,
-                            bounds,
-                            this.player.getOffsetX(),
-                            this.player.getOffsetY());
-
-            if (endpoint == null) {
-                this.state = PlayerState.NONE;
-            }
-
-            return;
-        }
-    }
-
-    public PlayerState getState() {
-        return this.state;
-    }
-}
-
-class Player extends Character {
-    private final float FRAME_DURATION = 0.25f;
-
-    private final MyGdxGame game;
-    private final Texture texture;
-    private final ObjectMap<String, com.badlogic.gdx.graphics.g2d.Animation<TextureRegion>> animations;
-    private final ObjectMap<Direction, com.badlogic.gdx.graphics.g2d.Animation<TextureRegion>> directionToAnimation;
+    private final Map<String, Animation<TextureRegion>> animations;
+    private final ObjectMap<Direction, Animation<TextureRegion>> directionToAnimation;
+    private final PlayerDescriptor descriptor;
 
     private float currentSpeed;
-    private com.badlogic.gdx.graphics.g2d.Animation<TextureRegion> currentAnimation;
+    private Animation<TextureRegion> currentAnimation;
     private Direction currentDirection;
     private float currentAnimationElapsedTime = 0f;
-    private final float speed;
 
-    private final float transitionSpeed;
-    private final PlayerStateController stateController;
-
-    private Player(MyGdxGame game,
-                   Scenario scenario,
-                   Rectangle bounds,
-                   Direction direction,
-                   Texture texture,
-                   float speed,
-                   float offsetX,
-                   float offsetY,
-                   PlayerState state) {
-        super(scenario, offsetX, offsetY);
+    Player(MyGdxGame game,
+           Scenario scenario,
+           Vector2 position,
+           Direction direction,
+           PlayerDescriptor descriptor) {
+        super(scenario, descriptor.offsetX, descriptor.offsetY);
         this.game = game;
         this.currentDirection = direction;
-        this.texture = texture;
-        this.speed = speed;
-        this.currentSpeed = speed;
-        this.transitionSpeed = speed / 4f;
-        this.stateController = new PlayerStateController(game, this, state);
-        this.animations = new ObjectMap<>();
-        this.animations.put("down",
-                new com.badlogic.gdx.graphics.g2d.Animation<>(
-                        FRAME_DURATION,
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0f, 0f, 0.25f, 0.25f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.25f, 0f, 0.5f, 0.25f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.5f, 0f, 0.75f, 0.25f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.75f, 0f, 1f, 0.25f)
-                        ))
-        );
-        this.animations.put("up",
-                new com.badlogic.gdx.graphics.g2d.Animation<>(
-                        FRAME_DURATION,
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0f, 0.75f, 0.25f, 1f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.25f, 0.75f, 0.5f, 1f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.5f, 0.75f, 0.75f, 1f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.75f, 0.75f, 1f, 1f)
-                        ))
-        );
-        this.animations.put("left",
-                new com.badlogic.gdx.graphics.g2d.Animation<>(
-                        FRAME_DURATION,
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0f, 0.25f, 0.25f, 0.5f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.25f, 0.25f, 0.5f, 0.5f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.5f, 0.25f, 0.75f, 0.5f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.75f, 0.25f, 1f, 0.5f)
-                        ))
-        );
-        this.animations.put("right",
-                new com.badlogic.gdx.graphics.g2d.Animation<>(
-                        FRAME_DURATION,
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0f, 0.5f, 0.25f, 0.75f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.25f, 0.5f, 0.5f, 0.75f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.5f, 0.5f, 0.75f, 0.75f)
-                        ),
-                        Animation.getTextureRegion(
-                                this.texture,
-                                new Rectangle(0.75f, 0.5f, 1f, 0.75f)
-                        ))
-        );
+        this.currentSpeed = descriptor.speed;
+        this.animations = descriptor.animations.getAnimations(game.getAssetManager());
+        this.descriptor = descriptor;
 
         this.directionToAnimation = new ObjectMap<>();
         this.directionToAnimation.put(Direction.DOWN, this.animations.get("down"));
@@ -201,50 +45,24 @@ class Player extends Character {
         this.directionToAnimation.put(Direction.RIGHT, this.animations.get("right"));
 
         this.currentAnimation = this.directionToAnimation.get(this.currentDirection);
-        this.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
+        this.setBounds(position.x, position.y, descriptor.width, descriptor.height);
     }
 
-    static Player New(MyGdxGame game,
-                      Scenario scenario,
-                      Texture texture,
-                      Vector2 position,
-                      Direction direction,
-                      PlayerState state) {
-        final int width = 64;
-        final int height = 64;
-        final float speed = 240;
-        final float offsetX = 14f;
-        final float offsetY = 5f;
-        Rectangle r = new Rectangle(position.x,
-                position.y,
-                width,
-                height);
-        return new Player(game,
-                scenario,
-                r,
-                direction,
-                texture,
-                speed,
-                offsetX,
-                offsetY,
-                state);
-    }
-
-    void update(float delta) {
-        this.stateController.update();
-
+    void update(float delta, PlayerState state) {
         float prevX = this.getX();
         float prevY = this.getY();
 
-        this.currentDirection = this.getDirection(delta);
-        this.currentSpeed = this.getSpeed();
+        this.currentDirection = this.getDirection(state, delta);
+        this.currentSpeed = this.getSpeed(state);
         this.setMovement(delta, this.currentSpeed, this.currentDirection);
         this.currentAnimation = this.directionToAnimation.get(this.currentDirection);
-        this.handleCollisions(prevX, prevY);
+        this.handleCollisions(state, prevX, prevY);
     }
 
-    private void handleCollisions(float prevX, float prevY) {
-        if (this.stateController.getState() != PlayerState.NONE) {
+    private void handleCollisions(PlayerState state,
+                                  float prevX,
+                                  float prevY) {
+        if (state != PlayerState.NONE) {
             return;
         }
 
@@ -254,23 +72,25 @@ class Player extends Character {
         }
     }
 
-    private float getSpeed() {
-        switch (this.stateController.getState()) {
+    private float getSpeed(PlayerState state) {
+        switch (state) {
             case EXITING_SCENARIO:
                 return 0f;
             case ENTERING_SCENARIO:
-                return this.transitionSpeed;
+                return this.descriptor.transitionSpeed;
+            case TALKING:
+                return 0f;
             default:
                 if (Gdx.input.isTouched()) {
-                    return this.speed;
+                    return this.descriptor.speed;
                 } else {
                     return 0f;
                 }
         }
     }
 
-    private Direction getDirection(float delta) {
-        if (this.stateController.getState() != PlayerState.NONE || !Gdx.input.isTouched()) {
+    private Direction getDirection(PlayerState state, float delta) {
+        if (state != PlayerState.NONE || !Gdx.input.isTouched()) {
             return this.currentDirection;
         }
 
@@ -310,12 +130,11 @@ class Player extends Character {
         TextureRegion frame = this.currentSpeed != 0f
                 ? this.currentAnimation.getKeyFrame(this.currentAnimationElapsedTime, true)
                 : this.currentAnimation.getKeyFrames()[0];
-        this.game.getBatch().draw(frame,
-                this.getX(),
-                this.getY());
+        this.setRegion(frame);
+        this.draw(this.game.getBatch());
     }
 
-    Direction getCurrentDirection() {
+    public Direction getCurrentDirection() {
         return currentDirection;
     }
 }

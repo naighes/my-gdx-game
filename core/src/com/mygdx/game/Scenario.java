@@ -2,35 +2,21 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-
-class ScenarioDescriptor {
-    ScenarioDescriptor(String name,
-                       Vector2 playerPosition,
-                       String assetPath,
-                       String collisionAssetPath,
-                       String overlayAssetPath,
-                       String playerAssetPath,
-                       Array<GuestDescriptor> guests) {
-        this.name = name;
-        this.playerPosition = playerPosition;
-        this.assetPath = assetPath;
-        this.collisionAssetPath = collisionAssetPath;
-        this.overlayAssetPath = overlayAssetPath;
-        this.playerAssetPath = playerAssetPath;
-        this.guests = guests;
-    }
-
-    public final String name;
-    public final Vector2 playerPosition;
-    public final String assetPath;
-    public final String collisionAssetPath;
-    public final String overlayAssetPath;
-    public final String playerAssetPath;
-    public final Array<GuestDescriptor> guests;
-}
+import com.mygdx.game.controllers.EndingConversation;
+import com.mygdx.game.controllers.EnteringScenario;
+import com.mygdx.game.controllers.ExitingScenario;
+import com.mygdx.game.controllers.InteractingWithGuest;
+import com.mygdx.game.controllers.PlayerState;
+import com.mygdx.game.controllers.PlayerStateController;
+import com.mygdx.game.controllers.PlayerStateControllerResult;
+import com.mygdx.game.descriptors.GuestDescriptor;
+import com.mygdx.game.descriptors.ScenarioDescriptor;
 
 public class Scenario extends ScreenAdapter {
     public final String name;
@@ -39,18 +25,18 @@ public class Scenario extends ScreenAdapter {
     private final float y;
     private final Vector2 playerPosition;
     private final Direction playerDirection;
-    private final String assetPath;
-    private final String collisionAssetPath;
-    private final String overlayAssetPath;
-    private final String playerAssetPath;
     private final GameCamera camera;
-    private final Array<GuestDescriptor> guestDescriptors;
     private final Array<Guest> guests;
+    private final TextBox tb;
+    private final PlayerStateController stateController;
+    private final ScenarioDescriptor descriptor;
 
     private boolean initialized = false;
     private Player player;
     private Area area;
     private Overlay overlay;
+    private Pair<String, Guest> pendingConversation;
+    private PlayerState playerState;
 
     Scenario(MyGdxGame game,
              String name,
@@ -58,31 +44,44 @@ public class Scenario extends ScreenAdapter {
              float y,
              Vector2 playerPosition,
              Direction playerDirection,
-             String assetPath,
-             String collisionAssetPath,
-             String overlayAssetPath,
-             String playerAssetPath,
-             Array<GuestDescriptor> guests) {
+             ScenarioDescriptor descriptor) {
         this.game = game;
         this.name = name;
         this.x = x;
         this.y = y;
         this.playerPosition = playerPosition;
         this.playerDirection = playerDirection;
-        this.assetPath = assetPath;
-        this.collisionAssetPath = collisionAssetPath;
-        this.overlayAssetPath = overlayAssetPath;
-        this.playerAssetPath = playerAssetPath;
+        this.descriptor = descriptor;
         this.camera = new GameCamera();
-        this.guestDescriptors = guests;
         this.guests = new Array<>();
+        this.pendingConversation = null;
+        this.tb = new TextBox(
+                game,
+                new Texture(Gdx.files.internal("rect_text.png")),
+                new BitmapFont(Gdx.files.internal("orange-kid.fnt")),
+                Color.BLUE,
+                18,
+                17,
+                8f,
+                64,
+                520f,
+                3f,
+                20,
+                Color.WHITE,
+                Color.BLACK
+        );
+        this.playerState = PlayerState.ENTERING_SCENARIO;
+        this.stateController = new ExitingScenario(game,
+                new EnteringScenario(game,
+                        new InteractingWithGuest(game,
+                                new EndingConversation())));
     }
 
     Area getArea() {
         return this.area;
     }
 
-    Player getPlayer() {
+    public Player getPlayer() {
         return this.player;
     }
 
@@ -98,30 +97,27 @@ public class Scenario extends ScreenAdapter {
             return;
         }
 
-        Texture playerTexture = this.game.getAssetManager().get(this.playerAssetPath);
-        this.player = Player.New(this.game,
+        this.player = new Player(this.game,
                 this,
-                playerTexture,
                 this.playerPosition,
                 this.playerDirection,
-                PlayerState.ENTERING_SCENARIO);
+                this.descriptor.player);
 
-        for (GuestDescriptor guestDescriptor : this.guestDescriptors) {
-            Texture guestTexture = this.game.getAssetManager().get(guestDescriptor.assetPath);
-            Guest guest = Guest.New(this.game,
+        for (GuestDescriptor guestDescriptor : this.descriptor.guests) {
+            Guest guest = new Guest(this.game,
                     this,
-                    guestTexture,
                     guestDescriptor.position,
-                    Direction.UP);
+                    Direction.UP,
+                    guestDescriptor);
             this.guests.add(guest);
         }
 
-        Texture texture = this.game.getAssetManager().get(this.assetPath);
-        Texture collisionTexture = this.game.getAssetManager().get(this.collisionAssetPath);
+        Texture texture = this.game.getAssetManager().get(this.descriptor.assetPath);
+        Texture collisionTexture = this.game.getAssetManager().get(this.descriptor.collisionAssetPath);
         Texture overlayTexture = null;
 
-        if (this.overlayAssetPath != null) {
-            overlayTexture = this.game.getAssetManager().get(this.overlayAssetPath);
+        if (this.descriptor.overlayAssetPath != null) {
+            overlayTexture = this.game.getAssetManager().get(this.descriptor.overlayAssetPath);
         }
 
         this.area = new Area(this.game,
@@ -143,13 +139,43 @@ public class Scenario extends ScreenAdapter {
         super.render(delta);
 
         this.camera.update(this);
-        this.player.update(delta);
+        PlayerStateControllerResult result = this.stateController.advance(this,
+                this.playerState);
+        this.playerState = result.getState();
+        this.player.update(delta, result.getState());
+        result.process();
 
         for (Guest guest : this.guests) {
             guest.update(delta);
         }
 
         this.draw();
+    }
+
+    public Guest checkGuestCollisions() {
+        for (Guest guest : this.guests) {
+            if (this.intersect(this.player, guest)) {
+                return guest;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean intersect(Player player, Guest guest) {
+        Rectangle pRect = player.getBoundingRectangle();
+        Rectangle gRect = guest.getBoundingRectangle();
+        float pl = pRect.x + player.getOffsetX();
+        float el = gRect.x + guest.getOffsetX();
+        float pr = pRect.x + pRect.width - player.getOffsetY();
+        float er = gRect.x + gRect.width - guest.getOffsetY();
+
+        float pd = pRect.y + player.getOffsetY();
+        float ed = gRect.y + guest.getOffsetY();
+        float pu = pRect.y + pRect.height - player.getOffsetY();
+        float eu = gRect.y + gRect.height - guest.getOffsetY();
+
+        return pl < er && pr > el && pd < eu && pu > ed;
     }
 
     private void draw() {
@@ -166,7 +192,21 @@ public class Scenario extends ScreenAdapter {
             overlay.render();
         }
 
+        if (this.hasPendingConversation()) {
+            if (this.tb.isConsumed() && Gdx.input.isTouched()) {
+                this.pendingConversation.y.leaveConversation();
+                this.pendingConversation = null;
+                this.tb.reset();
+            } else {
+                this.tb.render(this.pendingConversation.x, 300f, 200f);
+            }
+        }
+
         this.game.getBatch().end();
+    }
+
+    public boolean hasPendingConversation() {
+        return this.pendingConversation != null;
     }
 
     @Override
@@ -190,26 +230,30 @@ public class Scenario extends ScreenAdapter {
     }
 
     void loadAssets() {
-        this.game.getAssetManager().load(this.assetPath, Texture.class);
-        this.game.getAssetManager().load(this.collisionAssetPath, Texture.class);
-        this.game.getAssetManager().load(this.playerAssetPath, Texture.class);
+        this.game.getAssetManager().load(this.descriptor.assetPath, Texture.class);
+        this.game.getAssetManager().load(this.descriptor.collisionAssetPath, Texture.class);
+        this.game.getAssetManager().load(this.descriptor.player.animations.assetPath, Texture.class);
 
-        if (this.overlayAssetPath != null) {
-            this.game.getAssetManager().load(this.overlayAssetPath, Texture.class);
+        if (this.descriptor.overlayAssetPath != null) {
+            this.game.getAssetManager().load(this.descriptor.overlayAssetPath, Texture.class);
         }
 
-        for (GuestDescriptor guest : this.guestDescriptors) {
-            this.game.getAssetManager().load(guest.assetPath, Texture.class);
+        for (GuestDescriptor guest : this.descriptor.guests) {
+            this.game.getAssetManager().load(guest.animations.assetPath, Texture.class);
         }
     }
 
-    void unloadAssets() {
-        this.game.getAssetManager().unload(this.assetPath);
-        this.game.getAssetManager().unload(this.collisionAssetPath);
-        this.game.getAssetManager().unload(this.playerAssetPath);
+    private void unloadAssets() {
+        this.game.getAssetManager().unload(this.descriptor.assetPath);
+        this.game.getAssetManager().unload(this.descriptor.collisionAssetPath);
+        this.game.getAssetManager().unload(this.descriptor.player.animations.assetPath);
 
-        if (this.overlayAssetPath != null) {
-            this.game.getAssetManager().unload(this.overlayAssetPath);
+        if (this.descriptor.overlayAssetPath != null) {
+            this.game.getAssetManager().unload(this.descriptor.overlayAssetPath);
+        }
+
+        for (GuestDescriptor guest : this.descriptor.guests) {
+            this.game.getAssetManager().unload(guest.animations.assetPath);
         }
     }
 
@@ -222,7 +266,11 @@ public class Scenario extends ScreenAdapter {
         return this.initialized;
     }
 
-    public GameCamera getCamera() {
+    GameCamera getCamera() {
         return camera;
+    }
+
+    void startConversation(String[] conversations, Guest guest) {
+        this.pendingConversation = new Pair<>(conversations[0], guest);
     }
 }

@@ -5,50 +5,37 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.Json;
+import com.mygdx.game.descriptors.ScenarioDescriptor;
+import com.mygdx.game.descriptors.ScenariosDescriptor;
+import com.mygdx.game.junctions.Connections;
 
 public class MyGdxGame extends Game {
     private final Connections connections;
-    private final ObjectMap<String, ScenarioDescriptor> descriptors;
     private final AssetManager assetManager;
 
     private SpriteBatch batch;
     private Scenario currentScenario;
+    private ScenariosDescriptor scenarios;
 
     public MyGdxGame() {
         super();
 
         this.assetManager = new AssetManager();
         this.connections = new Connections();
-        this.connections.add(
-                new Connection(
-                        new Endpoint(
-                                "forest_1",
-                                new Rectangle(877f, 910f, 76f, 64f),
-                                new Vector2(880f, 50f)
-                        ),
-                        new Endpoint(
-                                "inner_castle_1",
-                                new Rectangle(1262, 378f, 142f, 64f),
-                                new Vector2(1310f, 200f)
-                        )
-                )
-        );
-        this.descriptors = new ObjectMap<>();
     }
 
-    Connections getConnections() {
+    // TODO: do on per scenario basis
+    public Connections getConnections() {
         return this.connections;
     }
 
-    void setCurrentScenario(String scenarioName,
-                            Vector2 playerPosition,
-                            Direction playerDirection) {
+    public void setCurrentScenario(String scenarioName,
+                                   Vector2 playerPosition,
+                                   Direction playerDirection) {
         Scenario previousScenario = this.currentScenario;
-        ScenarioDescriptor descriptor = this.descriptors.get(scenarioName);
+        ScenarioDescriptor descriptor = this.scenarios.descriptors.get(scenarioName);
         this.currentScenario = new Scenario(
                 this,
                 descriptor.name,
@@ -56,14 +43,10 @@ public class MyGdxGame extends Game {
                 0f,
                 playerPosition,
                 playerDirection,
-                descriptor.assetPath,
-                descriptor.collisionAssetPath,
-                descriptor.overlayAssetPath,
-                descriptor.playerAssetPath,
-                descriptor.guests
+                descriptor
         );
 
-        this.setScreen(new Splash(this,
+        this.setScreen(new ScenarioTransitionScreen(this,
                 previousScenario,
                 this.currentScenario));
     }
@@ -79,39 +62,13 @@ public class MyGdxGame extends Game {
     @Override
     public void create() {
         this.batch = new SpriteBatch();
-
-        Array<GuestDescriptor> forest1Guests = new Array<>();
-        forest1Guests.add(new GuestDescriptor(
-                "guest_1",
-                new Vector2(980f, 250f),
-                "guest_1.png"
-        ));
-
-        this.descriptors.put("forest_1",
-                new ScenarioDescriptor(
-                        "forest_1",
-                        new Vector2(880f, 50f),
-                        "background_1.jpg",
-                        "background_1_collision.gif",
-                        "background_1_overlay.png",
-                        "player_1.png",
-                        forest1Guests
-                ));
-
-        this.descriptors.put("inner_castle_1",
-                new ScenarioDescriptor(
-                        "inner_castle_1",
-                        new Vector2(1310f, 410f),
-                        "inner_castle_1.png",
-                        "inner_castle_1_collision.gif",
-                        null,
-                        "player_1.png",
-                        new Array<GuestDescriptor>()
-                ));
-
-        ScenarioDescriptor descriptor = this.descriptors.get("forest_1");
+        Json json = new Json();
+        this.scenarios = json.fromJson(ScenariosDescriptor.class,
+                Gdx.files.internal("scenarios.json"));
+        ScenarioDescriptor descriptor = this.scenarios.descriptors.get("forest_1");
+        this.connections.addRange(this.scenarios.connections);
         this.setCurrentScenario("forest_1",
-                descriptor.playerPosition,
+                descriptor.playerInitialPosition,
                 Direction.UP);
     }
 
