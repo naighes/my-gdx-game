@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 
 public class Character extends Sprite {
     private final Scenario scenario;
@@ -18,21 +19,9 @@ public class Character extends Sprite {
 
     void setMovement(float dt,
                      float speed,
-                     Direction direction) {
-        switch (direction) {
-            case RIGHT:
-                this.translateX(speed * dt);
-                break;
-            case LEFT:
-                this.translateX(-1f * speed * dt);
-                break;
-            case UP:
-                this.translateY(speed * dt);
-                break;
-            case DOWN:
-                this.translateY(-1f * speed * dt);
-                break;
-        }
+                     Vector2 direction) {
+        Vector2 movement =  direction.cpy().scl(speed * dt);
+        this.translate(movement.x, movement.y);
     }
 
     Tile getCollidedTile() {

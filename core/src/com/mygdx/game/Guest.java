@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.mygdx.game.descriptors.GuestDescriptor;
+import com.mygdx.game.utils.Geometry;
 
 import java.util.Map;
 import java.util.Random;
@@ -13,13 +14,13 @@ import java.util.Random;
 public class Guest extends Character {
     private final MyGdxGame game;
     private final Map<String, Animation<TextureRegion>> animations;
-    private final ObjectMap<Direction, Animation<TextureRegion>> directionToAnimation;
+    private final ObjectMap<Vector2, Animation<TextureRegion>> directionToAnimation;
     private final GuestDescriptor descriptor;
     private final Random rnd = new Random();
 
     private float currentSpeed;
     private Animation<TextureRegion> currentAnimation;
-    private Direction currentDirection;
+    private Vector2 currentDirection;
     private float currentAnimationElapsedTime = 0f;
 
     private float timeSinceLastChange;
@@ -30,7 +31,7 @@ public class Guest extends Character {
     public Guest(MyGdxGame game,
                  Scenario scenario,
                  Vector2 position,
-                 Direction direction,
+                 Vector2 direction,
                  GuestDescriptor descriptor) {
         super(scenario, descriptor.offsetX, descriptor.offsetY);
         this.game = game;
@@ -40,10 +41,10 @@ public class Guest extends Character {
         this.setBounds(position.x, position.y, descriptor.width, descriptor.height);
 
         this.directionToAnimation = new ObjectMap<>();
-        this.directionToAnimation.put(Direction.DOWN, this.animations.get("down"));
-        this.directionToAnimation.put(Direction.UP, this.animations.get("up"));
-        this.directionToAnimation.put(Direction.LEFT, this.animations.get("left"));
-        this.directionToAnimation.put(Direction.RIGHT, this.animations.get("right"));
+        this.directionToAnimation.put(Geometry.DOWN, this.animations.get("down"));
+        this.directionToAnimation.put(Geometry.UP, this.animations.get("up"));
+        this.directionToAnimation.put(Geometry.LEFT, this.animations.get("left"));
+        this.directionToAnimation.put(Geometry.RIGHT, this.animations.get("right"));
 
         this.currentAnimation = this.directionToAnimation.get(this.currentDirection);
     }
@@ -75,25 +76,11 @@ public class Guest extends Character {
         if (getCollidedTile() != null) {
             this.setX(prevX);
             this.setY(prevY);
-
-            switch (this.currentDirection) {
-                case DOWN:
-                    this.currentDirection = Direction.UP;
-                    break;
-                case UP:
-                    this.currentDirection = Direction.DOWN;
-                    break;
-                case LEFT:
-                    this.currentDirection = Direction.RIGHT;
-                    break;
-                case RIGHT:
-                    this.currentDirection = Direction.LEFT;
-                    break;
-            }
+            this.currentDirection = this.currentDirection.scl(-1f);
         }
     }
 
-    private Direction getDirection(float delta) {
+    private Vector2 getDirection(float delta) {
         if (this.timeSinceLastChange > this.nextDirectionChangeAt && !this.conversationInPlace) {
             // it'll automatically change direction in a range
             // between 2 and 10 seconds
@@ -108,18 +95,18 @@ public class Guest extends Character {
         }
     }
 
-    private Direction randDirection() {
+    private Vector2 randDirection() {
         int i = this.rnd.nextInt((4 - 1) + 1) + 1;
         switch (i) {
             case 1:
-                return Direction.UP;
+                return Geometry.UP;
             case 2:
-                return Direction.DOWN;
+                return Geometry.DOWN;
             case 3:
-                return Direction.LEFT;
+                return Geometry.LEFT;
         }
 
-        return Direction.RIGHT;
+        return Geometry.RIGHT;
     }
 
     void render() {

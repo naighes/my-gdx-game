@@ -17,6 +17,7 @@ import com.mygdx.game.controllers.PlayerStateControllerResult;
 import com.mygdx.game.descriptors.DialogTextBoxDescriptor;
 import com.mygdx.game.descriptors.GuestDescriptor;
 import com.mygdx.game.descriptors.ScenarioDescriptor;
+import com.mygdx.game.utils.Geometry;
 
 public class Scenario extends ScreenAdapter {
     public final String name;
@@ -24,7 +25,7 @@ public class Scenario extends ScreenAdapter {
     private final float x;
     private final float y;
     private final Vector2 playerPosition;
-    private final Direction playerDirection;
+    private final Vector2 playerDirection;
     private final GameCamera camera;
     private final Array<Guest> guests;
     private final PlayerStateController stateController;
@@ -44,7 +45,7 @@ public class Scenario extends ScreenAdapter {
              float x,
              float y,
              Vector2 playerPosition,
-             Direction playerDirection,
+             Vector2 playerDirection,
              ScenarioDescriptor descriptor,
              DialogTextBoxDescriptor textBoxDescriptor) {
         this.game = game;
@@ -95,7 +96,7 @@ public class Scenario extends ScreenAdapter {
             Guest guest = new Guest(this.game,
                     this,
                     guestDescriptor.position,
-                    Direction.UP,
+                    Geometry.UP, // TODO: needs to be parametrized
                     guestDescriptor);
             this.guests.add(guest);
         }

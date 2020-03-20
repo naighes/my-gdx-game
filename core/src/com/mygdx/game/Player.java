@@ -8,28 +8,25 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.mygdx.game.controllers.PlayerState;
 import com.mygdx.game.descriptors.PlayerDescriptor;
+import com.mygdx.game.utils.Geometry;
 
 import java.util.Map;
-
-enum Direction {
-    LEFT, RIGHT, UP, DOWN
-}
 
 public class Player extends Character {
     private final MyGdxGame game;
     private final Map<String, Animation<TextureRegion>> animations;
-    private final ObjectMap<Direction, Animation<TextureRegion>> directionToAnimation;
+    private final ObjectMap<Vector2, Animation<TextureRegion>> directionToAnimation;
     private final PlayerDescriptor descriptor;
 
     private float currentSpeed;
     private Animation<TextureRegion> currentAnimation;
-    private Direction currentDirection;
+    private Vector2 currentDirection;
     private float currentAnimationElapsedTime = 0f;
 
     Player(MyGdxGame game,
            Scenario scenario,
            Vector2 position,
-           Direction direction,
+           Vector2 direction,
            PlayerDescriptor descriptor) {
         super(scenario, descriptor.offsetX, descriptor.offsetY);
         this.game = game;
@@ -39,10 +36,10 @@ public class Player extends Character {
         this.descriptor = descriptor;
 
         this.directionToAnimation = new ObjectMap<>();
-        this.directionToAnimation.put(Direction.DOWN, this.animations.get("down"));
-        this.directionToAnimation.put(Direction.UP, this.animations.get("up"));
-        this.directionToAnimation.put(Direction.LEFT, this.animations.get("left"));
-        this.directionToAnimation.put(Direction.RIGHT, this.animations.get("right"));
+        this.directionToAnimation.put(Geometry.DOWN, this.animations.get("down"));
+        this.directionToAnimation.put(Geometry.UP, this.animations.get("up"));
+        this.directionToAnimation.put(Geometry.LEFT, this.animations.get("left"));
+        this.directionToAnimation.put(Geometry.RIGHT, this.animations.get("right"));
 
         this.currentAnimation = this.directionToAnimation.get(this.currentDirection);
         this.setBounds(position.x, position.y, descriptor.width, descriptor.height);
@@ -89,7 +86,7 @@ public class Player extends Character {
         }
     }
 
-    private Direction getDirection(PlayerState state, float delta) {
+    private Vector2 getDirection(PlayerState state, float delta) {
         if (state != PlayerState.NONE || !Gdx.input.isTouched()) {
             return this.currentDirection;
         }
@@ -106,19 +103,19 @@ public class Player extends Character {
         float currentY = this.getY() + this.getHeight() / 2;
         float deltaY = newY - currentY;
 
-        Direction direction;
+        Vector2 direction;
 
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
             if (deltaX > 0) {
-                direction = Direction.RIGHT;
+                direction = Geometry.RIGHT;
             } else {
-                direction = Direction.LEFT;
+                direction = Geometry.LEFT;
             }
         } else {
             if (deltaY > 0) {
-                direction = Direction.UP;
+                direction = Geometry.UP;
             } else {
-                direction = Direction.DOWN;
+                direction = Geometry.DOWN;
             }
         }
 
@@ -134,7 +131,7 @@ public class Player extends Character {
         this.draw(this.game.getBatch());
     }
 
-    public Direction getCurrentDirection() {
+    public Vector2 getCurrentDirection() {
         return currentDirection;
     }
 }

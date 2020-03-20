@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Json;
 import com.mygdx.game.descriptors.ScenarioDescriptor;
 import com.mygdx.game.descriptors.ScenariosDescriptor;
 import com.mygdx.game.junctions.Connections;
+import com.mygdx.game.utils.Geometry;
 
 public class MyGdxGame extends Game {
     private final Connections connections;
@@ -33,7 +34,7 @@ public class MyGdxGame extends Game {
 
     public void setCurrentScenario(String scenarioName,
                                    Vector2 playerPosition,
-                                   Direction playerDirection) {
+                                   Vector2 playerDirection) {
         Scenario previousScenario = this.currentScenario;
         ScenarioDescriptor descriptor = this.scenarios.descriptors.get(scenarioName);
         this.currentScenario = new Scenario(
@@ -70,7 +71,7 @@ public class MyGdxGame extends Game {
         this.connections.addRange(this.scenarios.connections);
         this.setCurrentScenario("forest_1",
                 descriptor.playerInitialPosition,
-                Direction.UP);
+                Geometry.UP); // TODO: should be paraetrized
     }
 
     @Override
