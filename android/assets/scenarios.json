@@ -406,5 +406,34 @@
         }
       }
     }
-  ]
+  ],
+  "dialogTextBox": {
+    "assetPath": "rect_text.png",
+    "fontName": "orange-kid.fnt",
+    "backgroundColor": {
+      "r": 0.0,
+      "g": 0.0,
+      "b": 1.0,
+      "a": 1.0
+    },
+    "upOffsetY": 18,
+    "sideOffsetX": 17,
+    "textPadding": 8.0,
+    "textSpeed": 64,
+    "boxAnimationSpeed": 520.0,
+    "dropShadowSize": 3.0,
+    "textRightMargin": 20,
+    "textColor": {
+      "r": 1.0,
+      "g": 1.0,
+      "b": 1.0,
+      "a": 1.0
+    },
+    "dropShadowColor": {
+      "r": 0.0,
+      "g": 0.0,
+      "b": 0.0,
+      "a": 1.0
+    }
+  }
 }

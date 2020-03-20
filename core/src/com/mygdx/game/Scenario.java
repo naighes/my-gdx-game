@@ -2,7 +2,6 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Rectangle;
@@ -15,6 +14,7 @@ import com.mygdx.game.controllers.InteractingWithGuest;
 import com.mygdx.game.controllers.PlayerState;
 import com.mygdx.game.controllers.PlayerStateController;
 import com.mygdx.game.controllers.PlayerStateControllerResult;
+import com.mygdx.game.descriptors.DialogTextBoxDescriptor;
 import com.mygdx.game.descriptors.GuestDescriptor;
 import com.mygdx.game.descriptors.ScenarioDescriptor;
 
@@ -27,14 +27,15 @@ public class Scenario extends ScreenAdapter {
     private final Direction playerDirection;
     private final GameCamera camera;
     private final Array<Guest> guests;
-    private final TextBox tb;
     private final PlayerStateController stateController;
     private final ScenarioDescriptor descriptor;
+    private final DialogTextBoxDescriptor textBoxDescriptor;
 
     private boolean initialized = false;
     private Player player;
     private Area area;
     private Overlay overlay;
+    private DialogTextBox tb;
     private Pair<String, Guest> pendingConversation;
     private PlayerState playerState;
 
@@ -44,7 +45,8 @@ public class Scenario extends ScreenAdapter {
              float y,
              Vector2 playerPosition,
              Direction playerDirection,
-             ScenarioDescriptor descriptor) {
+             ScenarioDescriptor descriptor,
+             DialogTextBoxDescriptor textBoxDescriptor) {
         this.game = game;
         this.name = name;
         this.x = x;
@@ -52,24 +54,10 @@ public class Scenario extends ScreenAdapter {
         this.playerPosition = playerPosition;
         this.playerDirection = playerDirection;
         this.descriptor = descriptor;
+        this.textBoxDescriptor = textBoxDescriptor;
         this.camera = new GameCamera();
         this.guests = new Array<>();
         this.pendingConversation = null;
-        this.tb = new TextBox(
-                game,
-                new Texture(Gdx.files.internal("rect_text.png")),
-                new BitmapFont(Gdx.files.internal("orange-kid.fnt")),
-                Color.BLUE,
-                18,
-                17,
-                8f,
-                64,
-                520f,
-                3f,
-                20,
-                Color.WHITE,
-                Color.BLACK
-        );
         this.playerState = PlayerState.ENTERING_SCENARIO;
         this.stateController = new ExitingScenario(game,
                 new EnteringScenario(game,
@@ -130,6 +118,14 @@ public class Scenario extends ScreenAdapter {
         if (overlayTexture != null) {
             this.overlay = new Overlay(this.game, this.x, this.y, overlayTexture);
         }
+
+        Texture textBoxTexture = this.game.getAssetManager().get(this.textBoxDescriptor.assetPath);
+        BitmapFont font = this.game.getAssetManager().get(this.textBoxDescriptor.fontName);
+
+        this.tb = new DialogTextBox(this.game,
+                textBoxTexture,
+                font,
+                this.textBoxDescriptor);
 
         this.initialized = true;
     }
@@ -241,6 +237,9 @@ public class Scenario extends ScreenAdapter {
         for (GuestDescriptor guest : this.descriptor.guests) {
             this.game.getAssetManager().load(guest.animations.assetPath, Texture.class);
         }
+
+        this.game.getAssetManager().load(this.textBoxDescriptor.assetPath, Texture.class);
+        this.game.getAssetManager().load(this.textBoxDescriptor.fontName, BitmapFont.class);
     }
 
     private void unloadAssets() {
@@ -255,6 +254,9 @@ public class Scenario extends ScreenAdapter {
         for (GuestDescriptor guest : this.descriptor.guests) {
             this.game.getAssetManager().unload(guest.animations.assetPath);
         }
+
+        this.game.getAssetManager().unload(this.textBoxDescriptor.assetPath);
+        this.game.getAssetManager().unload(this.textBoxDescriptor.fontName);
     }
 
     @Override

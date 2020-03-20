@@ -43,7 +43,8 @@ public class MyGdxGame extends Game {
                 0f,
                 playerPosition,
                 playerDirection,
-                descriptor
+                descriptor,
+                this.scenarios.dialogTextBox
         );
 
         this.setScreen(new ScenarioTransitionScreen(this,
