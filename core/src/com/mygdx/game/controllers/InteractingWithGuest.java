@@ -20,10 +20,14 @@ public class InteractingWithGuest implements PlayerStateController {
             return this.next.advance(scenario, state);
         }
 
-        Guest guest = scenario.checkGuestCollisions();
+        Guest guest = scenario.getPlayer().checkGuestCollisions();
 
-        if (guest != null && guest.wannaTalk()) {
-            return new TalkWithGuestResult(PlayerState.TALKING, guest);
+        if (guest != null &&
+                scenario.getConversationsController()
+                        .canStartConversation(guest)) {
+            return new TalkWithGuestResult(PlayerState.TALKING,
+                    guest,
+                    scenario);
         }
 
         return this.next.advance(scenario, state);

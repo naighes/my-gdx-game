@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -29,6 +30,7 @@ public class Player extends Character {
            Vector2 direction,
            PlayerDescriptor descriptor) {
         super(scenario, descriptor.offsetX, descriptor.offsetY);
+
         this.game = game;
         this.currentDirection = direction;
         this.currentSpeed = descriptor.speed;
@@ -49,9 +51,9 @@ public class Player extends Character {
         float prevX = this.getX();
         float prevY = this.getY();
 
+        this.setMovement(delta, this.currentSpeed, this.currentDirection);
         this.currentDirection = this.getDirection(state, delta);
         this.currentSpeed = this.getSpeed(state);
-        this.setMovement(delta, this.currentSpeed, this.currentDirection);
         this.currentAnimation = this.directionToAnimation.get(this.currentDirection);
         this.handleCollisions(state, prevX, prevY);
     }
@@ -122,16 +124,28 @@ public class Player extends Character {
         return direction;
     }
 
-    void render() {
+    @Override
+    public void draw(Batch batch) {
         this.currentAnimationElapsedTime += Gdx.graphics.getDeltaTime();
         TextureRegion frame = this.currentSpeed != 0f
                 ? this.currentAnimation.getKeyFrame(this.currentAnimationElapsedTime, true)
                 : this.currentAnimation.getKeyFrames()[0];
         this.setRegion(frame);
-        this.draw(this.game.getBatch());
+
+        super.draw(batch);
     }
 
     public Vector2 getCurrentDirection() {
-        return currentDirection;
+        return this.currentDirection;
+    }
+
+    public Guest checkGuestCollisions() {
+        for (Guest guest : this.getScenario().getGuests().values()) {
+            if (this.intersect(guest)) {
+                return guest;
+            }
+        }
+
+        return null;
     }
 }

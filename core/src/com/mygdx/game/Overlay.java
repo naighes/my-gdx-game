@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 
 class Overlay {
     private final MyGdxGame game;
@@ -18,9 +19,9 @@ class Overlay {
         this.texture = texture;
     }
 
-    void render() {
+    void draw(Batch batch) {
         if (this.texture != null) {
-            this.game.getBatch().draw(this.texture,
+            batch.draw(this.texture,
                     this.x,
                     this.y,
                     this.texture.getWidth(),

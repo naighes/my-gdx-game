@@ -3,13 +3,14 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Align;
 import com.mygdx.game.descriptors.DialogTextBoxDescriptor;
 
-class DialogTextBox extends Sprite {
+public class DialogTextBox extends Sprite {
     private final MyGdxGame game;
     private final Texture texture;
     private final BitmapFont font;
@@ -69,13 +70,13 @@ class DialogTextBox extends Sprite {
     private float boxAccumulator = 0f;
     private float textAccumulator = 0f;
 
-    void render(String text, float x, float y) {
+    public void draw(Batch batch, String text, float x, float y) {
         float delta = Gdx.graphics.getDeltaTime();
         float variation = (this.boxAccumulator * this.descriptor.boxAnimationSpeed);
 
         float upY = y + (this.texture.getHeight() / 2) + variation;
         final float upLimitY = y + this.texture.getHeight() - this.descriptor.upOffsetY;
-        this.game.getBatch().draw(
+        batch.draw(
                 this.regionUp,
                 x,
                 Math.min(upLimitY, upY)
@@ -83,7 +84,7 @@ class DialogTextBox extends Sprite {
 
         final float downLimitY = y;
         float downY = y + (this.texture.getHeight() / 2) - this.descriptor.upOffsetY - variation;
-        this.game.getBatch().draw(
+        batch.draw(
                 this.regionDown,
                 x,
                 Math.max(downLimitY, downY)
@@ -91,14 +92,14 @@ class DialogTextBox extends Sprite {
 
         final float rightLimitY = y + this.descriptor.upOffsetY;
         float rightY = y + (this.texture.getHeight() / 2) - variation;
-        this.game.getBatch().draw(
+        batch.draw(
                 this.regionSide,
                 x,
                 Math.max(rightLimitY, rightY),
                 this.regionSide.getRegionWidth(),
                 Math.min(variation * 2, this.regionSide.getRegionHeight())
         );
-        this.game.getBatch().draw(
+        batch.draw(
                 this.regionSide,
                 x + this.texture.getWidth() - this.descriptor.sideOffsetX,
                 Math.max(rightLimitY, rightY),
@@ -109,7 +110,7 @@ class DialogTextBox extends Sprite {
         float centerLimitY = y + this.descriptor.upOffsetY;
         float centerY = y + (this.texture.getHeight() / 2) - variation;
 
-        this.game.getBatch().draw(
+        batch.draw(
                 this.fillTexture,
                 x + this.descriptor.sideOffsetX,
                 Math.max(centerLimitY, centerY),
@@ -122,10 +123,10 @@ class DialogTextBox extends Sprite {
         }
 
         this.boxAccumulator += delta;
-        this.drawText(text, x, y, delta);
+        this.drawText(batch, text, x, y, delta);
     }
 
-    private void drawText(String text, float x, float y, float delta) {
+    private void drawText(Batch batch, String text, float x, float y, float delta) {
         if (!this.boxFullyVisible) {
             return;
         }
@@ -140,7 +141,7 @@ class DialogTextBox extends Sprite {
 
         font.setColor(this.descriptor.dropShadowColor);
         this.font.draw(
-                this.game.getBatch(),
+                batch,
                 drawnText,
                 x + this.descriptor.sideOffsetX + this.descriptor.textPadding + this.descriptor.dropShadowSize,
                 y + this.texture.getHeight() - this.descriptor.upOffsetY - this.descriptor.textPadding - this.descriptor.dropShadowSize,
@@ -150,7 +151,7 @@ class DialogTextBox extends Sprite {
         );
         font.setColor(this.descriptor.textColor);
         this.font.draw(
-                this.game.getBatch(),
+                batch,
                 drawnText,
                 x + this.descriptor.sideOffsetX + this.descriptor.textPadding,
                 y + this.texture.getHeight() - this.descriptor.upOffsetY - this.descriptor.textPadding,
@@ -165,11 +166,11 @@ class DialogTextBox extends Sprite {
         }
     }
 
-    boolean isConsumed() {
-        return done;
+    public boolean isConsumed() {
+        return this.done;
     }
 
-    void reset() {
+    public void reset() {
         this.boxFullyVisible = false;
         this.done = false;
         this.boxAccumulator = 0f;

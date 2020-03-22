@@ -71,7 +71,7 @@ public class MyGdxGame extends Game {
         this.connections.addRange(this.scenarios.connections);
         this.setCurrentScenario("forest_1",
                 descriptor.playerInitialPosition,
-                Geometry.UP); // TODO: should be paraetrized
+                Geometry.UP); // TODO: should be parametrized
     }
 
     @Override

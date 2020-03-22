@@ -3,41 +3,9 @@ package com.mygdx.game;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.TextureData;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
-
-import java.util.Locale;
-
-class Tile {
-    private final int x;
-    private final int y;
-    private final int size;
-    private final boolean solid;
-
-    Tile(int x,
-         int y,
-         int size,
-         boolean solid) {
-        this.x = x;
-        this.y = y;
-        this.size = size;
-        this.solid = solid;
-    }
-
-    boolean isSolid() {
-        return this.solid;
-    }
-
-    @Override
-    public String toString() {
-        return String.format(Locale.getDefault(),
-                "x:%d; y:%d; size:%d; solid: %b",
-                this.x,
-                this.y,
-                this.size,
-                this.solid);
-    }
-}
 
 class Area {
     private final int TILE_SIZE = 32;
@@ -140,8 +108,8 @@ class Area {
         }
     }
 
-    void render() {
-        this.game.getBatch().draw(this.texture,
+    void draw(Batch batch) {
+        batch.draw(this.texture,
                 this.x,
                 this.y,
                 this.texture.getWidth(),

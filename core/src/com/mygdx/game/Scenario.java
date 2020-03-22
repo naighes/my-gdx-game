@@ -1,12 +1,12 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
+import com.mygdx.game.controllers.ConversationsController;
 import com.mygdx.game.controllers.EndingConversation;
 import com.mygdx.game.controllers.EnteringScenario;
 import com.mygdx.game.controllers.ExitingScenario;
@@ -27,8 +27,8 @@ public class Scenario extends ScreenAdapter {
     private final Vector2 playerPosition;
     private final Vector2 playerDirection;
     private final GameCamera camera;
-    private final Array<Guest> guests;
-    private final PlayerStateController stateController;
+    private final ObjectMap<String, Guest> guests;
+    private final PlayerStateController playerStateController;
     private final ScenarioDescriptor descriptor;
     private final DialogTextBoxDescriptor textBoxDescriptor;
 
@@ -36,8 +36,7 @@ public class Scenario extends ScreenAdapter {
     private Player player;
     private Area area;
     private Overlay overlay;
-    private DialogTextBox tb;
-    private Pair<String, Guest> pendingConversation;
+    private ConversationsController conversationsController;
     private PlayerState playerState;
 
     Scenario(MyGdxGame game,
@@ -57,21 +56,36 @@ public class Scenario extends ScreenAdapter {
         this.descriptor = descriptor;
         this.textBoxDescriptor = textBoxDescriptor;
         this.camera = new GameCamera();
-        this.guests = new Array<>();
-        this.pendingConversation = null;
+        this.guests = new ObjectMap<>();
         this.playerState = PlayerState.ENTERING_SCENARIO;
-        this.stateController = new ExitingScenario(game,
+        this.playerStateController = new ExitingScenario(game,
                 new EnteringScenario(game,
                         new InteractingWithGuest(game,
                                 new EndingConversation())));
     }
 
-    Area getArea() {
+    public Area getArea() {
         return this.area;
     }
 
     public Player getPlayer() {
         return this.player;
+    }
+
+    public boolean isInitialized() {
+        return this.initialized;
+    }
+
+    public GameCamera getCamera() {
+        return this.camera;
+    }
+
+    public ConversationsController getConversationsController() {
+        return this.conversationsController;
+    }
+
+    public ObjectMap<String, Guest> getGuests() {
+        return this.guests;
     }
 
     @Override
@@ -96,9 +110,9 @@ public class Scenario extends ScreenAdapter {
             Guest guest = new Guest(this.game,
                     this,
                     guestDescriptor.position,
-                    Geometry.UP, // TODO: needs to be parametrized
+                    Geometry.DOWN, // TODO: needs to be parametrized
                     guestDescriptor);
-            this.guests.add(guest);
+            this.guests.put(guest.getDescriptor().name, guest);
         }
 
         Texture texture = this.game.getAssetManager().get(this.descriptor.assetPath);
@@ -123,10 +137,10 @@ public class Scenario extends ScreenAdapter {
         Texture textBoxTexture = this.game.getAssetManager().get(this.textBoxDescriptor.assetPath);
         BitmapFont font = this.game.getAssetManager().get(this.textBoxDescriptor.fontName);
 
-        this.tb = new DialogTextBox(this.game,
+        this.conversationsController = new ConversationsController(new DialogTextBox(this.game,
                 textBoxTexture,
                 font,
-                this.textBoxDescriptor);
+                this.textBoxDescriptor));
 
         this.initialized = true;
     }
@@ -135,75 +149,42 @@ public class Scenario extends ScreenAdapter {
     public void render(float delta) {
         super.render(delta);
 
+        this.update(delta);
+        this.draw(this.game.getBatch());
+    }
+
+    public void update(float delta) {
         this.camera.update(this);
-        PlayerStateControllerResult result = this.stateController.advance(this,
+
+        PlayerStateControllerResult result = this.playerStateController.advance(this,
                 this.playerState);
         this.playerState = result.getState();
-        this.player.update(delta, result.getState());
+        this.player.update(delta, this.playerState);
         result.process();
 
-        for (Guest guest : this.guests) {
+        for (Guest guest : this.guests.values()) {
             guest.update(delta);
         }
 
-        this.draw();
+        this.conversationsController.update(delta);
     }
 
-    public Guest checkGuestCollisions() {
-        for (Guest guest : this.guests) {
-            if (this.intersect(this.player, guest)) {
-                return guest;
-            }
-        }
+    private void draw(Batch batch) {
+        batch.setProjectionMatrix(this.camera.getInnerCamera().combined);
+        batch.begin();
+        this.getArea().draw(batch);
+        this.player.draw(batch);
 
-        return null;
-    }
-
-    private boolean intersect(Player player, Guest guest) {
-        Rectangle pRect = player.getBoundingRectangle();
-        Rectangle gRect = guest.getBoundingRectangle();
-        float pl = pRect.x + player.getOffsetX();
-        float el = gRect.x + guest.getOffsetX();
-        float pr = pRect.x + pRect.width - player.getOffsetY();
-        float er = gRect.x + gRect.width - guest.getOffsetY();
-
-        float pd = pRect.y + player.getOffsetY();
-        float ed = gRect.y + guest.getOffsetY();
-        float pu = pRect.y + pRect.height - player.getOffsetY();
-        float eu = gRect.y + gRect.height - guest.getOffsetY();
-
-        return pl < er && pr > el && pd < eu && pu > ed;
-    }
-
-    private void draw() {
-        this.game.getBatch().setProjectionMatrix(this.camera.getInnerCamera().combined);
-        this.game.getBatch().begin();
-        this.getArea().render();
-        this.player.render();
-
-        for (Guest guest : this.guests) {
-            guest.render();
+        for (Guest guest : this.guests.values()) {
+            guest.draw(batch);
         }
 
         if (this.overlay != null) {
-            overlay.render();
+            overlay.draw(batch);
         }
 
-        if (this.hasPendingConversation()) {
-            if (this.tb.isConsumed() && Gdx.input.isTouched()) {
-                this.pendingConversation.y.leaveConversation();
-                this.pendingConversation = null;
-                this.tb.reset();
-            } else {
-                this.tb.render(this.pendingConversation.x, 300f, 200f);
-            }
-        }
-
-        this.game.getBatch().end();
-    }
-
-    public boolean hasPendingConversation() {
-        return this.pendingConversation != null;
+        this.conversationsController.draw(batch);
+        batch.end();
     }
 
     @Override
@@ -264,16 +245,5 @@ public class Scenario extends ScreenAdapter {
     public void dispose() {
         this.unloadAssets();
     }
-
-    boolean isInitialized() {
-        return this.initialized;
-    }
-
-    GameCamera getCamera() {
-        return camera;
-    }
-
-    void startConversation(String[] conversations, Guest guest) {
-        this.pendingConversation = new Pair<>(conversations[0], guest);
-    }
 }
+

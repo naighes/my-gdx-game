@@ -34,14 +34,30 @@ public class Character extends Sprite {
     }
 
     public float getOffsetX() {
-        return offsetX;
+        return this.offsetX;
     }
 
     public float getOffsetY() {
-        return offsetY;
+        return this.offsetY;
     }
 
     public Scenario getScenario() {
-        return scenario;
+        return this.scenario;
+    }
+
+    public boolean intersect(Character character) {
+        Rectangle pRect = this.getBoundingRectangle();
+        Rectangle gRect = character.getBoundingRectangle();
+        float pl = pRect.x + this.getOffsetX();
+        float el = gRect.x + character.getOffsetX();
+        float pr = pRect.x + pRect.width - this.getOffsetY();
+        float er = gRect.x + gRect.width - character.getOffsetY();
+
+        float pd = pRect.y + this.getOffsetY();
+        float ed = gRect.y + character.getOffsetY();
+        float pu = pRect.y + pRect.height - this.getOffsetY();
+        float eu = gRect.y + gRect.height - this.getOffsetY();
+
+        return pl < er && pr > el && pd < eu && pu > ed;
     }
 }
