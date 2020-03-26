@@ -137,10 +137,12 @@ public class Scenario extends ScreenAdapter {
         Texture textBoxTexture = this.game.getAssetManager().get(this.textBoxDescriptor.assetPath);
         BitmapFont font = this.game.getAssetManager().get(this.textBoxDescriptor.fontName);
 
-        this.conversationsController = new ConversationsController(new DialogTextBox(this.game,
-                textBoxTexture,
-                font,
-                this.textBoxDescriptor));
+        this.conversationsController = new ConversationsController(
+                this,
+                new DialogTextBox(textBoxTexture,
+                        font,
+                        this.textBoxDescriptor)
+        );
 
         this.initialized = true;
     }
@@ -170,7 +172,7 @@ public class Scenario extends ScreenAdapter {
     }
 
     private void draw(Batch batch) {
-        batch.setProjectionMatrix(this.camera.getInnerCamera().combined);
+        batch.setProjectionMatrix(this.camera.combined);
         batch.begin();
         this.getArea().draw(batch);
         this.player.draw(batch);

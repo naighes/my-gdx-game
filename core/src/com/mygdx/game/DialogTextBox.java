@@ -11,7 +11,6 @@ import com.badlogic.gdx.utils.Align;
 import com.mygdx.game.descriptors.DialogTextBoxDescriptor;
 
 public class DialogTextBox extends Sprite {
-    private final MyGdxGame game;
     private final Texture texture;
     private final BitmapFont font;
     private final DialogTextBoxDescriptor descriptor;
@@ -24,13 +23,11 @@ public class DialogTextBox extends Sprite {
     private boolean boxFullyVisible = false;
     private boolean done = false;
 
-    DialogTextBox(MyGdxGame game,
-                  Texture texture,
+    DialogTextBox(Texture texture,
                   BitmapFont font,
                   DialogTextBoxDescriptor descriptor) {
         super();
 
-        this.game = game;
         this.texture = texture;
         this.font = font;
         this.descriptor = descriptor;
@@ -65,16 +62,31 @@ public class DialogTextBox extends Sprite {
         pixmap.fill();
         this.fillTexture = new Texture(pixmap);
         pixmap.dispose();
+        this.setBounds(0f, 0f, this.texture.getWidth(), this.texture.getHeight());
     }
 
     private float boxAccumulator = 0f;
     private float textAccumulator = 0f;
+    private String text = "";
 
-    public void draw(Batch batch, String text, float x, float y) {
+    public void setText(String text) {
+        this.text = text;
+        this.resetText();
+    }
+
+    @Override
+    public void draw(Batch batch) {
+        this.drawBox(batch);
+        this.drawText(batch);
+    }
+
+    private void drawBox(Batch batch) {
         float delta = Gdx.graphics.getDeltaTime();
         float variation = (this.boxAccumulator * this.descriptor.boxAnimationSpeed);
+        float x = this.getX();
+        float y = this.getY();
 
-        float upY = y + (this.texture.getHeight() / 2) + variation;
+        float upY = y + (this.texture.getHeight() / 2f) + variation;
         final float upLimitY = y + this.texture.getHeight() - this.descriptor.upOffsetY;
         batch.draw(
                 this.regionUp,
@@ -83,7 +95,7 @@ public class DialogTextBox extends Sprite {
         );
 
         final float downLimitY = y;
-        float downY = y + (this.texture.getHeight() / 2) - this.descriptor.upOffsetY - variation;
+        float downY = y + (this.texture.getHeight() / 2f) - this.descriptor.upOffsetY - variation;
         batch.draw(
                 this.regionDown,
                 x,
@@ -91,7 +103,7 @@ public class DialogTextBox extends Sprite {
         );
 
         final float rightLimitY = y + this.descriptor.upOffsetY;
-        float rightY = y + (this.texture.getHeight() / 2) - variation;
+        float rightY = y + (this.texture.getHeight() / 2f) - variation;
         batch.draw(
                 this.regionSide,
                 x,
@@ -108,7 +120,7 @@ public class DialogTextBox extends Sprite {
         );
 
         float centerLimitY = y + this.descriptor.upOffsetY;
-        float centerY = y + (this.texture.getHeight() / 2) - variation;
+        float centerY = y + (this.texture.getHeight() / 2f) - variation;
 
         batch.draw(
                 this.fillTexture,
@@ -123,10 +135,13 @@ public class DialogTextBox extends Sprite {
         }
 
         this.boxAccumulator += delta;
-        this.drawText(batch, text, x, y, delta);
     }
 
-    private void drawText(Batch batch, String text, float x, float y, float delta) {
+    private void drawText(Batch batch) {
+        float delta = Gdx.graphics.getDeltaTime();
+        float x = this.getX();
+        float y = this.getY();
+
         if (!this.boxFullyVisible) {
             return;
         }
@@ -170,10 +185,18 @@ public class DialogTextBox extends Sprite {
         return this.done;
     }
 
-    public void reset() {
+    public void resetAll() {
+        this.resetBox();
+        this.resetText();
+    }
+
+    private void resetBox() {
         this.boxFullyVisible = false;
-        this.done = false;
         this.boxAccumulator = 0f;
+    }
+
+    private void resetText() {
         this.textAccumulator = 0f;
+        this.done = false;
     }
 }

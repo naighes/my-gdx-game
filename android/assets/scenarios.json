@@ -132,7 +132,134 @@
             }
           },
           "conversations": [
-            "Hello dude, my name is Max. I'm hanging around here to look for some new friend!"
+            "Hello dude, my name is Max. I'm hanging around here to look for some new friend!",
+            "See ya!"
+          ]
+        },
+
+        {
+          "name": "dragon_1",
+          "position": {
+            "x": 900.0,
+            "y": 720.0
+          },
+          "width": 128,
+          "height": 128,
+          "offsetX": 1.0,
+          "offsetY": 4.0,
+          "speed": 10.0,
+          "animations": {
+            "frameDuration": 0.25,
+            "assetPath": "dragon_1.png",
+            "animations": {
+              "down": [
+                {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "width": 0.25,
+                  "height": 0.25
+                },
+                {
+                  "x": 0.25,
+                  "y": 0.0,
+                  "width": 0.5,
+                  "height": 0.25
+                },
+                {
+                  "x": 0.5,
+                  "y": 0.0,
+                  "width": 0.75,
+                  "height": 0.25
+                },
+                {
+                  "x": 0.75,
+                  "y": 0.0,
+                  "width": 1.0,
+                  "height": 0.25
+                }
+              ],
+              "up": [
+                {
+                  "x": 0.0,
+                  "y": 0.75,
+                  "width": 0.25,
+                  "height": 1.0
+                },
+                {
+                  "x": 0.25,
+                  "y": 0.75,
+                  "width": 0.5,
+                  "height": 1.0
+                },
+                {
+                  "x": 0.5,
+                  "y": 0.75,
+                  "width": 0.75,
+                  "height": 1.0
+                },
+                {
+                  "x": 0.75,
+                  "y": 0.75,
+                  "width": 1.0,
+                  "height": 1.0
+                }
+              ],
+              "left": [
+                {
+                  "x": 0.0,
+                  "y": 0.25,
+                  "width": 0.25,
+                  "height": 0.5
+                },
+                {
+                  "x": 0.25,
+                  "y": 0.25,
+                  "width": 0.5,
+                  "height": 0.5
+                },
+                {
+                  "x": 0.5,
+                  "y": 0.25,
+                  "width": 0.75,
+                  "height": 0.5
+                },
+                {
+                  "x": 0.75,
+                  "y": 0.25,
+                  "width": 1.0,
+                  "height": 0.5
+                }
+              ],
+              "right": [
+                {
+                  "x": 0.0,
+                  "y": 0.5,
+                  "width": 0.25,
+                  "height": 0.75
+                },
+                {
+                  "x": 0.25,
+                  "y": 0.5,
+                  "width": 0.5,
+                  "height": 0.75
+                },
+                {
+                  "x": 0.5,
+                  "y": 0.5,
+                  "width": 0.75,
+                  "height": 0.75
+                },
+                {
+                  "x": 0.75,
+                  "y": 0.5,
+                  "width": 1.0,
+                  "height": 0.75
+                }
+              ]
+            }
+          },
+          "conversations": [
+            "Grrrrrr! I'm the evil dragon of this town! You'll have the chance to fight me... sooner or later!"
           ]
         }
       ],

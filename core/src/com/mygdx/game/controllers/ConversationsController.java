@@ -2,38 +2,58 @@ package com.mygdx.game.controllers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.DialogTextBox;
+import com.mygdx.game.GameCamera;
 import com.mygdx.game.Guest;
 import com.mygdx.game.Player;
+import com.mygdx.game.Scenario;
 
 import java.util.HashMap;
 import java.util.Map;
 
 class PendingConversation {
-    private final Player player;
+    final Player player;
     final Guest guest;
-    final String text;
+
+    private int currentIndex;
 
     PendingConversation(Player player,
-                        Guest guest,
-                        String text) {
+                        Guest guest) {
         this.player = player;
         this.guest = guest;
-        this.text = text;
+        this.currentIndex = 0;
+    }
+
+    String current() {
+        return this.guest.getDescriptor().conversations[this.currentIndex];
+    }
+
+    boolean moveNext() {
+        int next = this.currentIndex + 1;
+
+        if (next >= this.guest.getDescriptor().conversations.length) {
+            return false;
+        }
+
+        this.currentIndex = next;
+        return true;
     }
 }
 
 public class ConversationsController {
+    private final Scenario scenario;
     private final DialogTextBox textBox;
     private final Map<String, Float> conversationHistory;
     private PendingConversation pendingConversation;
 
-    public ConversationsController(DialogTextBox textBox) {
+    public ConversationsController(Scenario scenario, DialogTextBox textBox) {
+        this.scenario = scenario;
         this.textBox = textBox;
         this.conversationHistory = new HashMap<>();
     }
 
-    public boolean canStartConversation(Guest guest) {
+    boolean canStartConversation(Guest guest) {
         if (!guest.wannaTalk()) {
             return false;
         }
@@ -46,25 +66,18 @@ public class ConversationsController {
         return time == null || time > 10f;
     }
 
-    public void tryStartConversation(Guest guest, Player player) {
+    void tryStartConversation(Guest guest, Player player) {
         if (!this.canStartConversation(guest)) {
             return;
         }
 
-        String[] availableConversations = guest.getAvailableConversations();
         this.conversationHistory.put(guest.getDescriptor().name, 0f);
-        this.pendingConversation = new PendingConversation(player,
-                guest,
-                availableConversations[0]);
+        this.pendingConversation = new PendingConversation(player, guest);
+        this.textBox.setText(this.pendingConversation.current());
     }
 
     public void update(float delta) {
-        if (this.hasPendingConversation() &&
-                this.textBox.isConsumed() &&
-                Gdx.input.isTouched()) {
-            this.pendingConversation = null;
-            this.textBox.reset();
-        }
+        this.updateTextBox();
 
         for (Map.Entry<String, Float> entry : this.conversationHistory.entrySet()) {
             String busy = this.hasPendingConversation()
@@ -76,13 +89,47 @@ public class ConversationsController {
         }
     }
 
-    public void draw(Batch batch) {
-        if (this.hasPendingConversation()) {
-            this.textBox.draw(batch, this.pendingConversation.text, 300f, 200f); // TODO
+    private void updateTextBox() {
+        if (!this.hasPendingConversation()) {
+            return;
+        }
+
+        if (this.textBox.isConsumed() && Gdx.input.isTouched()) {
+            boolean hasNext = this.pendingConversation.moveNext();
+
+            if (hasNext) {
+                this.textBox.setText(this.pendingConversation.current());
+            } else {
+                this.pendingConversation = null;
+                this.textBox.resetAll();
+            }
         }
     }
 
-    public boolean hasPendingConversation() {
+    public void draw(Batch batch) {
+        if (this.hasPendingConversation()) {
+            Vector2 position = calculateTextPosition(this.scenario.getCamera(),
+                    this.pendingConversation.player);
+            this.textBox.setX(position.x);
+            this.textBox.setY(position.y);
+            this.textBox.draw(batch);
+        }
+    }
+
+    private Vector2 calculateTextPosition(GameCamera camera, Player player) {
+        final float offset = 20f;
+
+        float cx = player.getX() > camera.position.x
+                ? camera.position.x - (camera.viewportWidth / 2f) + offset
+                : camera.position.x + (camera.viewportWidth / 2f) - offset - this.textBox.getWidth();
+        float cy = player.getY() > camera.position.y
+                ? camera.position.y - (camera.viewportHeight / 2f) + offset
+                : camera.position.y + (camera.viewportHeight / 2f) - offset - this.textBox.getHeight();
+
+        return new Vector2(cx, cy);
+    }
+
+    boolean hasPendingConversation() {
         return this.pendingConversation != null;
     }
 

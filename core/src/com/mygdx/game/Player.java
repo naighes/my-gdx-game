@@ -95,7 +95,7 @@ public class Player extends Character {
 
         Vector3 touchPos = new Vector3();
         touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-        this.getScenario().getCamera().getInnerCamera().unproject(touchPos);
+        this.getScenario().getCamera().unproject(touchPos);
 
         float newX = touchPos.x;
         float currentX = this.getX() + this.getWidth() / 2;
