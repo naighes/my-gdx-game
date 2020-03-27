@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Guest extends Character {
-    private final MyGdxGame game;
     private final Map<String, Animation<TextureRegion>> animations;
     private final Map<Vector2, Animation<TextureRegion>> directionToAnimation;
     private final GuestDescriptor descriptor;
@@ -24,18 +23,18 @@ public class Guest extends Character {
     private Vector2 currentDirection;
     private float currentAnimationElapsedTime = 0f;
 
-    public Guest(MyGdxGame game,
-                 Scenario scenario,
-                 Vector2 position,
-                 Vector2 direction,
-                 GuestDescriptor descriptor) {
+    Guest(MyGdxGame game,
+          Scenario scenario,
+          Vector2 position,
+          Vector2 direction,
+          GuestDescriptor descriptor) {
         super(scenario, descriptor.offsetX, descriptor.offsetY);
-        this.game = game;
+
         this.currentDirection = direction;
         this.descriptor = descriptor;
         this.animations = descriptor.animations.getAnimations(game.getAssetManager());
         this.setBounds(position.x, position.y, descriptor.width, descriptor.height);
-        this.directionController = new GuestDirectionController(this);
+        this.directionController = new GuestDirectionController(this, this.getScenario());
 
         this.directionToAnimation = new HashMap<>();
         this.directionToAnimation.put(Geometry.DOWN, this.animations.get("down"));
@@ -58,10 +57,6 @@ public class Guest extends Character {
         this.currentSpeed = this.getSpeed();
         this.currentAnimation = this.directionToAnimation.get(this.currentDirection);
         this.handleCollisions(prevX, prevY, collidedTile);
-    }
-
-    public String[] getAvailableConversations() {
-        return this.descriptor.conversations;
     }
 
     float getSpeed() {

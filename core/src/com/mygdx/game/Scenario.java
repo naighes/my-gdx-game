@@ -64,7 +64,7 @@ public class Scenario extends ScreenAdapter {
                                 new EndingConversation())));
     }
 
-    public Area getArea() {
+    Area getArea() {
         return this.area;
     }
 
@@ -72,7 +72,7 @@ public class Scenario extends ScreenAdapter {
         return this.player;
     }
 
-    public boolean isInitialized() {
+    boolean isInitialized() {
         return this.initialized;
     }
 
@@ -84,7 +84,7 @@ public class Scenario extends ScreenAdapter {
         return this.conversationsController;
     }
 
-    public ObjectMap<String, Guest> getGuests() {
+    ObjectMap<String, Guest> getGuests() {
         return this.guests;
     }
 
@@ -155,7 +155,7 @@ public class Scenario extends ScreenAdapter {
         this.draw(this.game.getBatch());
     }
 
-    public void update(float delta) {
+    private void update(float delta) {
         this.camera.update(this);
 
         PlayerStateControllerResult result = this.playerStateController.advance(this,

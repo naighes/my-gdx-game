@@ -517,9 +517,9 @@
       "endpoint1": {
         "scenarioName": "forest_1",
         "collisionArea": {
-          "x": 877.0,
+          "x": 873.0,
           "y": 910.0,
-          "width": 76.0,
+          "width": 84.0,
           "height": 64.0
         }
       },

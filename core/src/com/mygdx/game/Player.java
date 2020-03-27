@@ -14,7 +14,6 @@ import com.mygdx.game.utils.Geometry;
 import java.util.Map;
 
 public class Player extends Character {
-    private final MyGdxGame game;
     private final Map<String, Animation<TextureRegion>> animations;
     private final ObjectMap<Vector2, Animation<TextureRegion>> directionToAnimation;
     private final PlayerDescriptor descriptor;
@@ -31,7 +30,6 @@ public class Player extends Character {
            PlayerDescriptor descriptor) {
         super(scenario, descriptor.offsetX, descriptor.offsetY);
 
-        this.game = game;
         this.currentDirection = direction;
         this.currentSpeed = descriptor.speed;
         this.animations = descriptor.animations.getAnimations(game.getAssetManager());
